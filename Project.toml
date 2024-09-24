@@ -1,0 +1,13 @@
+name = "CRTBPNaturalMotion"
+uuid = "4cf003db-9ce5-4b9c-be33-539375ceab17"
+authors = ["Grant Hecht"]
+version = "0.0.1-DEV"
+
+[compat]
+julia = "1.10"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
