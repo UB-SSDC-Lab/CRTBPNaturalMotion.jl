@@ -3,6 +3,10 @@ uuid = "4cf003db-9ce5-4b9c-be33-539375ceab17"
 authors = ["Grant Hecht"]
 version = "0.0.1-DEV"
 
+[deps]
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
 [compat]
 julia = "1.10"
 
