@@ -153,8 +153,7 @@ end
         x0::SVector{6,TX},
         tspan::Tuple{TT,TT},
         mu,
-        term_cond::Function,
-        iv::Type{AbstractIndependantVariable};
+        term_cond::Function[, iv::Type{AbstractIndependantVariable}];
         solver = Vern9(),
         reltol = 1e-14,
         abstol = 1e-14,
@@ -203,6 +202,21 @@ final argument can be specified to set the desired independant variable (i.e., `
         reltol = reltol,
     )
 end
+
+@inline function propagate_return_all_states(
+    x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu, term_cond::Function;
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+) where {TX,TT}
+    return propagate_return_all_states(
+        x0, tspan, mu, term_cond, Time;
+        solver = solver,
+        reltol = reltol,
+        abstol = abstol,
+    )
+end
+
 @inline function propagate_return_all_states(
     x0::SVector{6,TX}, sspan::Tuple{TT,TT}, mu, term_cond::Function, iv::Type{ArcLength};
     solver = Vern9(),
@@ -218,6 +232,87 @@ end
         ),
         solver;
         callback = ContinuousCallback(term_cond, integ -> terminate!(integ)),
+        abstol = abstol,
+        reltol = reltol,
+    )
+end
+
+"""
+    propagate_return_all_states(
+        x0::SVector{6,TX},
+        tspan::Tuple{TT,TT},
+        mu,
+        cond::Function,
+        affect::Function,
+        iv::Type{AbstractIndependantVariable};
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) where {TX,TT}
+
+Propagate the state `x0` over the time span `tspan` and return the full ODE solution. This
+is done employing a DifferentialEquations.jl ContinuousCallback defined with `cond` and
+`affect`. The final argument can be specified to set the desired independant variable
+(i.e., `Time` or `ArcLength`).
+
+# Arguments
+- `x0::SVector{6,TX}`: The initial state with x0 = [r0; v0].
+- `tspan::Tuple{TT,TT}`: The span of the independant variable forwhich to solve the ODE.
+- `mu::Real`: The mass parameter of the three-body system (`mu = m2 / (m1 + m2)`).
+- `cond::Function`: The DifferentialEquations.jl continuous callback condition function
+    that will apply `affect` to the integrator struct (see
+    [DifferentialEquations.jl callback documentation](https://docs.sciml.ai/DiffEqDocs/stable/features/callback_functions/)).
+- `affect::Function`: The DifferentialEquations.jl continuous callback affect function.
+- `iv::Type{AbstractIndependantVariable}`: The desired independant variable (Time if
+    unspecified).
+
+# Keywords
+- `solver::OrdinaryDiffEq.AbstractODESolver`: The solver to use for the integration.
+- `reltol`: The relative tolerance for the solver.
+- `abstol`: The absolute tolerance for the solver.
+
+# Returns
+- `ODESolution`: The full solution to the ODE problem.
+"""
+@inline function propagate_return_all_states(
+    x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu,
+    cond::Function, affect::Function,
+    iv::Type{Time};
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+) where {TX,TT}
+    return solve(
+        ODEProblem{false, SciMLBase.FullSpecialize}(
+            natural_crtbp_eom,
+            x0,
+            tspan,
+            (mu,),
+        ),
+        solver;
+        callback = ContinuousCallback(cond, affect),
+        abstol = abstol,
+        reltol = reltol,
+    )
+end
+
+@inline function propagate_return_all_states(
+    x0::SVector{6,TX}, sspan::Tuple{TT,TT}, mu,
+    cond::Function, affect::Function,
+    iv::Type{ArcLength};
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+) where {TX,TT}
+    return solve(
+        ODEProblem{false, SciMLBase.FullSpecialize}(
+            natural_crtbp_eom_with_independant_arclen,
+            x0,
+            sspan,
+            (mu,),
+        ),
+        solver;
+        callback = ContinuousCallback(cond, affect),
         abstol = abstol,
         reltol = reltol,
     )
@@ -270,6 +365,7 @@ final argument can be specified to set the desired independant variable (i.e., `
         save_everystep = false,
     )[end]
 end
+
 @inline function propagate_return_final_state(
     x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu;
     solver = Vern9(),
@@ -283,6 +379,7 @@ end
         abstol = abstol,
     )
 end
+
 @inline function propagate_return_final_state(
     x0::SVector{6,TX}, sspan::Tuple{TT,TT}, mu, ::Type{ArcLength};
     solver = Vern9(),
@@ -360,6 +457,7 @@ final argument can be specified to set the desired independant variable (i.e., `
         save_everystep = false,
     )[end]
 end
+
 @inline function propagate_return_final_state(
     x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu, term_cond::Function;
     solver = Vern9(),
@@ -373,6 +471,7 @@ end
         abstol = abstol,
     )
 end
+
 @inline function propagate_return_final_state(
     x0::SVector{6,TX}, sspan::Tuple{TT,TT}, mu, term_cond::Function, ::Type{ArcLength};
     solver = Vern9(),
@@ -547,4 +646,55 @@ matrix (STM).
     )[end]
 
     return get_stm(z_stop)
+end
+
+"""
+    propagate_return_final_state_and_stm(
+        x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu;
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) where {TX,TT}
+
+Propagate the state `x0` over the time span `tspan` and return the final state and the
+state transition matrix (STM).
+
+# arguments
+- `x0::SVector{6,TX}`: The initial state with x0 = [r0; v0].
+- `tspan::Tuple{TT,TT}`: The span of the independant variable forwhich to solve the ode.
+- `mu::Real`: The mass parameter of the three-body system (`mu = m2 / (m1 + m2)`).
+
+# keywords
+- `solver::OrdinaryDiffEq.AbstractODESolver`: The solver to use for the integration.
+- `reltol`: The relative tolerance for the solver.
+- `abstol`: The absolute tolerance for the solver.
+
+# returns
+- `SMatrix{6,6,TX,36}`: The stm for the full trajectory
+"""
+@inline function propagate_return_final_state_and_stm(
+    x0::SVector{6,TX}, tspan::Tuple{TT,TT}, mu;
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+) where {TX,TT}
+    # Form initial state with STM
+    z_start = initial_state_with_stm(x0)
+
+    # Propagate
+    z_stop = solve(
+        ODEProblem{false, SciMLBase.FullSpecialize}(
+            natural_crtbp_eom_with_stm,
+            z_start,
+            tspan,
+            (mu,),
+        ),
+        solver;
+        abstol = abstol,
+        reltol = reltol,
+        save_start = false,
+        save_everystep = false,
+    )[end]
+
+    return get_state_and_stm(z_stop)
 end
