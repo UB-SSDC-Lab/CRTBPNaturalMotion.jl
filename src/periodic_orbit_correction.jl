@@ -44,7 +44,7 @@ function correct_typeA_initial_conditions(
     ode_solver  = Vern9(),
     ode_reltol  = 1e-14,
     ode_abstol  = 1e-14,
-    nl_solver   = SimpleTrustRegion(autodiff = nothing, nlsolve_update_rule = Val(true)),
+    nl_solver   = TrustRegion(autodiff = nothing),
 )
     # Define initial state from guess
     x0_guess = SA[rx_guess, 0.0, rz_guess, 0.0, vy_guess, 0.0]
@@ -65,13 +65,13 @@ function correct_typeA_initial_conditions(
 
     # Construct shooting function and jacobian
     fun = let constraint = constraint
-        (u,p) -> typeA_shooting_function(u, p, constraint = constraint)
+        (du,u,p) -> typeA_shooting_function!(du, u, p, constraint = constraint)
     end
     jac = let constraint = constraint
-        (u,p) -> typeA_shooting_jacobian(u, p, constraint = constraint)
+        (J,u,p) -> typeA_shooting_jacobian!(J, u, p, constraint = constraint)
     end
-    nlfun = NonlinearFunction{false, SciMLBase.FullSpecialize}(fun; jac = jac)
-    nlp = NonlinearProblem{false}(nlfun, SA[rx_guess,rz_guess,vy_guess,half_P], (mu,))
+    nlfun = NonlinearFunction{true, SciMLBase.FullSpecialize}(fun; jac = jac)
+    nlp = NonlinearProblem{true}(nlfun, [rx_guess,rz_guess,vy_guess,half_P], (mu,))
 
     # Solve and return solution with flag indicating success/failure (true/false)
     nlsol = solve(nlp, nl_solver)

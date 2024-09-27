@@ -14,6 +14,10 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Reference" => [
+            "Public API" => "lib/public.md",
+            "Internals" => "lib/internal/temp.md",
+        ]
     ],
 )
 

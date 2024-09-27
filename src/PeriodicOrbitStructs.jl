@@ -86,6 +86,34 @@ function TypeAPeriodicOrbit(
         SA[rx,rz,vy], P, S, N_cross, mu,
     )
 end
+"""
+    TypeAPeriodicOrbit(
+        orbit::TypeAPeriodicOrbit;
+        constraint = (:x_start_coordinate, 0.8),
+        ode_solver = Vern9(),
+        ode_reltol = 1e-12,
+        ode_abstol = 1e-12,
+        nl_solver  = SimpleTrustRegion(autodiff = nothing, nlsolve_update_rule = Val(true)),
+    )
+"""
+function TypeAPeriodicOrbit(
+    orbit::TypeAPeriodicOrbit;
+    constraint = (:x_start_coordinate, 0.8),
+    ode_solver = Vern9(),
+    ode_reltol = 1e-12,
+    ode_abstol = 1e-12,
+    nl_solver  = SimpleTrustRegion(autodiff = nothing, nlsolve_update_rule = Val(true)),
+)
+    return TypeAPeriodicOrbit(
+        orbit.u0[1], orbit.u0[2], orbit.u0[3], orbit.mu;
+        N_cross = orbit.N_cross,
+        constraint = constraint,
+        ode_solver = ode_solver,
+        ode_reltol = ode_reltol,
+        ode_abstol = ode_abstol,
+        nl_solver  = nl_solver,
+    )
+end
 
 """
     get_full_initial_state(orbit::TypeAPeriodicOrbit)
@@ -237,4 +265,18 @@ function get_full_orbit(
         reltol = reltol,
         abstol = abstol,
     )
+end
+
+function Base.show(
+    io::IO, orbit::TypeAPeriodicOrbit,
+)
+    compact = get(io, :compact, false)
+    if compact
+        println(io, "TypeAPeriodicOrbit")
+    else
+        println(io, "TypeAPeriodicOrbit")
+        println(io, "  Orbital period:  $(orbit.P)")
+        println(io, "  Arc-length:      $(orbit.S)")
+        println(io, "  N_cross:         $(orbit.N_cross)")
+    end
 end

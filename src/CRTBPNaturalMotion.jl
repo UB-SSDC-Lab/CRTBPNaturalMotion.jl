@@ -28,6 +28,6 @@ export propagate_return_arc_length, propagate_return_time
 
 # Periodic orbits
 export correct_typeA_initial_conditions
-export TypeAPeriodicOrbit
+export TypeAPeriodicOrbit, get_full_orbit
 
 end
