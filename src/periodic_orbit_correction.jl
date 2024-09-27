@@ -40,7 +40,7 @@ Correct the initial conditions of a type-A periodic orbit using a forward shooti
 function correct_typeA_initial_conditions(
     rx_guess, rz_guess, vy_guess, mu;
     N_cross     = 1,
-    constraint  = (:x_start_coordinate, 0.0),
+    constraint  = (:x_start_coordinate, rx_guess),
     ode_solver  = Vern9(),
     ode_reltol  = 1e-14,
     ode_abstol  = 1e-14,

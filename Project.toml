@@ -1,7 +1,7 @@
 name = "CRTBPNaturalMotion"
 uuid = "4cf003db-9ce5-4b9c-be33-539375ceab17"
 authors = ["Grant Hecht"]
-version = "0.0.1-DEV"
+version = "0.0.1"
 
 [deps]
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"

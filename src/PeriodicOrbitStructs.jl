@@ -52,7 +52,7 @@ end
 function TypeAPeriodicOrbit(
     rx, rz, vy, mu;
     N_cross = 1,
-    constraint = (:x_start_coordinate, 0.8),
+    constraint = (:x_start_coordinate, rx),
     ode_solver = Vern9(),
     ode_reltol = 1e-12,
     ode_abstol = 1e-12,
