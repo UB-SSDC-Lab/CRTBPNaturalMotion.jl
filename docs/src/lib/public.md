@@ -16,7 +16,14 @@ Pages = ["public.md"]
 ## Periodic Orbit Computation
 ```@autodocs
 Modules = [CRTBPNaturalMotion]
-Pages = ["PeriodicOrbitStructs.jl", "periodic_orbit_correction.jl"]
+Pages = ["periodic_orbits.jl", "periodic_orbit_correction.jl"]
+Private = false
+```
+
+## Invariant Manifold Computation
+```@autodocs
+Modules = [CRTBPNaturalMotion]
+Pages = ["manifolds.jl"]
 Private = false
 ```
 
@@ -37,7 +44,7 @@ Private = false
 ## Utility Functions
 ```@autodocs
 Modules = [CRTBPNaturalMotion]
-Pages = ["utils.jl"]
+Pages = ["utils.jl", "interpolation.jl"]
 Private = false
 ```
 
