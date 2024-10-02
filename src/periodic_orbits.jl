@@ -198,8 +198,6 @@ function propagate_from_initial_conditions(
     # Propagate and return
     if τ1 == 0.0
         return x0
-    elseif τ1 == 1.0
-        return x0
     else
         return propagate_return_final_state(
             x0, tspan, orbit.mu, PT;
@@ -265,6 +263,106 @@ function get_full_orbit(
         reltol = reltol,
         abstol = abstol,
     )
+end
+
+"""
+    generate_periodic_orbit_cheb_interpolation(
+        orbit::AbstractPeriodicOrbit, τ1_order::Int, PT::ParameterizationType;
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Float64}}
+
+Generate a Chebyshev interpolation of the periodic `orbit` in terms of `PT` employing
+a Chebyshev polynomial of order `τ1_order`.
+
+# Arguments
+- `orbit::AbstractPeriodicOrbit`: The periodic orbit.
+- `τ1_order::Int`: The order of the Chebyshev polynomial.
+- `PT::ParameterizationType`: The type of parameterization to use (`Time` or `ArcLength`).
+
+# Keyword Arguments
+- `solver::OrdinaryDiffEq.AbstractODESolver`: The ODE solver to use for the integration.
+- `reltol::Real`: The relative tolerance for the ODE solver.
+- `abstol::Real`: The absolute tolerance for the ODE solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Float64}}`: The Chebyshev interpolation.
+"""
+function generate_periodic_orbit_cheb_interpolation(
+    orbit::AbstractPeriodicOrbit, τ1_order::Int, PT::ParameterizationType;
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Get chebyshev nodes
+    τ1s = chebpoints(τ1_order, 0.0, 1.0)
+
+    # Compute state for each node
+    states = Vector{SVector{6,Float64}}(undef, τ1_order + 1)
+    for (i, τ1) in enumerate(τ1s)
+        states[i] = propagate_from_initial_conditions(
+            orbit, τ1, PT;
+            solver = solver,
+            reltol = reltol,
+            abstol = abstol,
+        )
+    end
+
+    # Return interpolation
+    return FastChebInterpolation(chebinterp(states, 0.0, 1.0))
+end
+
+"""
+    generate_periodic_orbit_cheb_approximation(
+        orbit::AbstractPeriodicOrbit, τ1_npoints::Int, τ1_order::Int, PT::ParameterizationType;
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Float64}}
+
+Generate a Chebyshev approximation of the periodic `orbit` in terms of `PT` employing
+`τ1_npoints` fit to a Chebyshev polynomial of order `τ1_order`.
+
+# Arguments
+- `orbit::AbstractPeriodicOrbit`: The periodic orbit.
+- `τ1_npoints::Int`: The number of points to fit the Chebyshev polynomial.
+- `τ1_order::Int`: The order of the Chebyshev polynomial.
+- `PT::ParameterizationType`: The type of parameterization to use (`Time` or `ArcLength`).
+
+# Keyword Arguments
+- `solver::OrdinaryDiffEq.AbstractODESolver`: The ODE solver to use for the integration.
+- `reltol::Real`: The relative tolerance for the ODE solver.
+- `abstol::Real`: The absolute tolerance for the ODE solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Float64}}`: The Chebyshev approximation.
+"""
+function generate_periodic_orbit_cheb_approximation(
+    orbit::AbstractPeriodicOrbit,
+    τ1_npoints::Int,
+    τ1_order::Int,
+    PT::ParameterizationType;
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Get chebyshev nodes
+    τ1s = chebpoints(τ1_npoints - 1, 0.0, 1.0)
+
+    # Compute state for each node
+    states = Vector{SVector{6,Float64}}(undef, τ1_npoints)
+    for (i, τ1) in enumerate(τ1s)
+        states[i] = propagate_from_initial_conditions(
+            orbit, τ1, PT;
+            solver = solver,
+            reltol = reltol,
+            abstol = abstol,
+        )
+    end
+
+    # Return interpolation
+    return FastChebInterpolation(chebregression(τ1s, states, 0.0, 1.0, τ1_order))
 end
 
 function Base.show(

@@ -5,15 +5,17 @@ using Reexport
 @reexport using OrdinaryDiffEq
 using NonlinearSolve
 using LinearSolve
+using FastChebInterp
 
 include("type_flags.jl")
 include("utils.jl")
+include("interpolation.jl")
 
 include("equations_of_motion.jl")
 include("integration.jl")
 include("periodic_orbit_shooting_functions.jl")
 include("periodic_orbit_correction.jl")
-include("PeriodicOrbitStructs.jl")
+include("periodic_orbits.jl")
 
 # Provides easy definition of sample orbits (not exported)
 include("scenario_orbits.jl")
@@ -22,6 +24,9 @@ include("scenario_orbits.jl")
 export Time, ArcLength
 export jacobi_integral
 
+# Interpolation functions
+export value, jacobian
+
 # Propagation functions
 export propagate_return_all_states, propagate_return_final_state, propagate_return_final_stm
 export propagate_return_arc_length, propagate_return_time
@@ -29,5 +34,7 @@ export propagate_return_arc_length, propagate_return_time
 # Periodic orbits
 export correct_typeA_initial_conditions
 export TypeAPeriodicOrbit, get_full_orbit
+export generate_periodic_orbit_cheb_interpolation
+export generate_periodic_orbit_cheb_approximation
 
 end

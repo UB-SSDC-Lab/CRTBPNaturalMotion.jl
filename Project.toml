@@ -4,6 +4,7 @@ authors = ["Grant Hecht"]
 version = "0.0.1"
 
 [deps]
+FastChebInterp = "cf66c380-9a80-432c-aff8-4f9c79c0bdde"
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
