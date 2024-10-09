@@ -36,11 +36,15 @@ struct TypeAPeriodicOrbit <: AbstractPeriodicOrbit
 
     # The gravitational parameter
     mu::Float64
+
+    # Units
+    TU::Float64
+    LU::Float64
 end
 
 """
     TypeAPeriodicOrbit(
-        rx, rz, vy, mu;
+        rx, rz, vy, mu[, TU, LU];
         N_cross = 1,
         constraint = (:x_start_coordinate, 0.8),
         ode_solver = Vern9(),
@@ -50,7 +54,7 @@ end
     )
 """
 function TypeAPeriodicOrbit(
-    rx, rz, vy, mu;
+    rx, rz, vy, mu, TU = NaN, LU = NaN;
     N_cross = 1,
     constraint = (:x_start_coordinate, rx),
     ode_solver = Vern9(),
@@ -83,7 +87,7 @@ function TypeAPeriodicOrbit(
     )
 
     return TypeAPeriodicOrbit(
-        SA[rx,rz,vy], P, S, N_cross, mu,
+        SA[rx,rz,vy], P, S, N_cross, mu, TU, LU,
     )
 end
 """
@@ -105,7 +109,7 @@ function TypeAPeriodicOrbit(
     nl_solver  = SimpleTrustRegion(autodiff = nothing, nlsolve_update_rule = Val(true)),
 )
     return TypeAPeriodicOrbit(
-        orbit.u0[1], orbit.u0[2], orbit.u0[3], orbit.mu;
+        orbit.u0[1], orbit.u0[2], orbit.u0[3], orbit.mu, orbit.TU, orbit.LU;
         N_cross = orbit.N_cross,
         constraint = constraint,
         ode_solver = ode_solver,
@@ -116,17 +120,74 @@ function TypeAPeriodicOrbit(
 end
 
 """
-    get_full_initial_state(orbit::TypeAPeriodicOrbit)
+    GeneralPeriodicOrbit
+
+A general representation of a periodic orbit.
+
+# Fields
+- `x0::SVector{6, Float64}`: The initial conditions for the periodic orbit.
+- `P::Float64`: The period of the periodic orbit.
+- `S::Float64`: The arc length along the periodic orbit.
+- `mu::Float64`: The gravitational parameter of the CRTBP.
+"""
+struct GeneralPeriodicOrbit <: AbstractPeriodicOrbit
+    # The initial conditions for the periodic orbit
+    x0::SVector{6, Float64}
+
+    # The jacobi integral of the periodic orbit
+    jacobi::Float64
+
+    # The stability of the orbit
+    stability::Float64
+
+    # The period of the periodic orbit
+    P::Float64
+
+    # The arc length along the periodic orbit
+    S::Float64
+
+    # The gravitational parameter
+    mu::Float64
+
+    # Units
+    TU::Float64
+    LU::Float64
+end
+
+function GeneralPeriodicOrbit(
+    x0, P, mu;
+    jacobi     = NaN,
+    stability  = NaN,
+    TU         = NaN,
+    LU         = NaN,
+    ode_solver = Vern9(),
+    ode_reltol = 1e-14,
+    ode_abstol = 1e-14,
+)
+    # Compute orbit arc length
+    S = propagate_return_arc_length(
+        x0, (0.0, P), mu;
+        solver = ode_solver,
+        reltol = ode_reltol,
+        abstol = ode_abstol,
+    )
+
+    return GeneralPeriodicOrbit(x0, jacobi, stability, P, S, mu, TU, LU)
+end
+
+"""
+    get_full_initial_state(orbit::AbstractPeriodicOrbit)
 
 Get the full initial reference state of the periodic `orbit`.
 
 # Arguments
-- `orbit::TypeAPeriodicOrbit`: The periodic orbit.
+- `orbit::AbstractPeriodicOrbit`: The periodic orbit.
 
 # Returns
 - `x0::SVector{6,Float64}`: The full initial state of the periodic orbit.
 """
 get_full_initial_state(orbit::TypeAPeriodicOrbit) = SA[orbit.u0[1], 0.0, orbit.u0[2], 0.0, orbit.u0[3], 0.0]
+get_full_initial_state(orbit::GeneralPeriodicOrbit) = orbit.x0
 
 """
     get_orbit_length(orbit::TypeAPeriodicOrbit, type::Type{AbstractIndependantVariable})
@@ -366,15 +427,23 @@ function generate_periodic_orbit_cheb_approximation(
 end
 
 function Base.show(
-    io::IO, orbit::TypeAPeriodicOrbit,
+    io::IO, ::MIME"text/plain", orbit::TypeAPeriodicOrbit,
 )
     compact = get(io, :compact, false)
     if compact
         println(io, "TypeAPeriodicOrbit")
     else
         println(io, "TypeAPeriodicOrbit")
-        println(io, "  Orbital period:  $(orbit.P)")
-        println(io, "  Arc-length:      $(orbit.S)")
+        if isnan(orbit.TU)
+            println(io, "  Orbital period:  $(orbit.P) TU")
+        else
+            println(io, "  Orbital period:  $(orbit.P*orbit.TU) s")
+        end
+        if isnan(orbit.LU)
+            println(io, "  Arc-length:      $(orbit.S) LU")
+        else
+            println(io, "  Arc-length:      $(orbit.S*orbit.LU) km")
+        end
         println(io, "  N_cross:         $(orbit.N_cross)")
     end
 end

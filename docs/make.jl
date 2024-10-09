@@ -14,6 +14,10 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Examples" => [
+            "Computing Halo Orbits" => "periodic_orbit_example.md",
+            "Querying the JPL API" => "jpl_api_example.md",
+        ],
         "Reference" => [
             "Public API" => "lib/public.md",
             "Internals" => "lib/internal/temp.md",
