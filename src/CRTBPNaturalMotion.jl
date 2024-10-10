@@ -59,5 +59,6 @@ export get_unstable_manifold_trajectory
 
 # JPL API
 export get_jpl_orbits
+export minimum_period_orbit, maximum_period_orbit
 
 end

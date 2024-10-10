@@ -120,7 +120,7 @@ function construct_query(;
     elseif family == "dragonfly" # Need branch
         query = api*"?sys=$sys&family=dragonfly&branch=$branch"
     elseif family == "resonant" # Need branch
-        query = api*"?sys=$sys&family=resonant&libr=$libr&branch=$branch"
+        query = api*"?sys=$sys&family=resonant&branch=$branch"
     elseif family == "dro"
         query = api*"?sys=$sys&family=dro"
     elseif family == "dpo"

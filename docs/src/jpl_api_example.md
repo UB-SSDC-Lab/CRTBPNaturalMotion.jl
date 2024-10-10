@@ -1,6 +1,8 @@
 # Querying JPL's CRTBP Poincare Catalog of Periodic Orbits
 `CRTBPNaturalMotion.jl` provides an interface to JPL's CRTBP Poincare catalog of periodic orbits through the exported function `get_jpl_orbits`. Through several keyword arguments (see the [`get_jpl_orbits`](@ref) docstring), which directly correspond to the in JPL's [web application](https://ssd.jpl.nasa.gov/tools/periodic_orbits.html) and [API documentation](https://ssd-api.jpl.nasa.gov/doc/periodic_orbits.html), an `OrbitSet` of periodic orbits can be obtained for various three-body systems (e.g., Earth-Moon, Sun-Earth, Saturn-Enceladus, etc...).
 
+## Earth-Moon Halo orbits
+
 As a simple example, we can obtain the full set of periodic orbits about the ``L_1`` Libration point as follows:
 ```@example jpl_api
 using CRTBPNaturalMotion
@@ -38,8 +40,9 @@ can be employed to obtain a single `GeneralPeriodicOrbit` or a subset of the ori
 We can obtain a full trajectory for the periodic orbit as shown in [Computing Halo Orbits](@ref) using the `get_full_orbit` method. For example, several orbits within `stable_orbits` can be plotted using `CairoMakie.jl` as follows:
 ```@example jpl_api
 using CairoMakie
+CairoMakie.activate!(type = "png") # hide
 
-fig = Figure()
+fig = Figure(; size = (700, 1000))
 ax  = Axis3(
     fig[1,1]; 
     aspect = :data,
@@ -67,7 +70,7 @@ plot_moon(ax, stable_orbits)
 fig # hide
 ```
 
-# Some additional plotting examples
+# Quick examples
 ### Plotting a subset of the Earth-Moon Butterfly orbits 
 ```@example jpl_api
 butterfly_orbits = get_jpl_orbits(;
@@ -104,7 +107,7 @@ axial_orbits = get_jpl_orbits(;
     libr        = 4,
 )
 
-axial_fig = Figure()
+axial_fig = Figure(; size = (800,600))
 axial_ax_xy  = Axis(
     axial_fig[1,1]; 
     aspect = DataAspect(),

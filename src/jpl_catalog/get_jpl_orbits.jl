@@ -142,6 +142,30 @@ Base.IndexStyle(::Type{OrbitSet}) = Base.IndexStyle(Vector{GeneralPeriodicOrbit}
 Base.setindex!(os::OrbitSet, o::GeneralPeriodicOrbit, i::Int) = setindex!(os.orbits, o, i)
 Base.length(os::OrbitSet) = length(os.orbits)
 
+# Utility functions
+function minimum_period_orbit(os::OrbitSet)
+    min_period = Inf
+    idx = 0
+    for (i,orbit) in enumerate(os.orbits)
+        if orbit.P < min_period
+            min_period = orbit.P
+            idx = i
+        end
+    end
+    return os[idx]
+end
+function maximum_period_orbit(os::OrbitSet)
+    max_period = -Inf
+    idx = 0
+    for (i,orbit) in enumerate(os.orbits)
+        if orbit.P > max_period
+            max_period = orbit.P
+            idx = i
+        end
+    end
+    return os[idx]
+end
+
 # Define pretty printing
 function Base.show(io::IO, ::MIME"text/plain", os::OrbitSet)
     compact = get(io, :compact, false)

@@ -25,6 +25,12 @@ struct TypeAPeriodicOrbit <: AbstractPeriodicOrbit
     # The initial conditions for the periodic orbit
     u0::SVector{3, Float64}
 
+    # The jacobi integral of the periodic orbit
+    jacobi::Float64
+
+    # The stability of the orbit
+    stability::Float64
+
     # The period of the periodic orbit
     P::Float64
 
@@ -86,8 +92,23 @@ function TypeAPeriodicOrbit(
         abstol = ode_abstol,
     )
 
+    # Compute jacobi integral
+    jacobi = jacobi_integral(SA[rx, 0.0, rz, 0.0, vy, 0.0], mu)
+
+    # Compute the stability index
+    M = propagate_return_final_stm(
+        SA[rx, 0.0, rz, 0.0, vy, 0.0], (0.0, P), mu;
+        solver = ode_solver,
+        reltol = ode_reltol,
+        abstol = ode_abstol,
+    )
+    vals, _ = eigen(M)
+    idx_min = argmin(abs.(real(vals)))
+    idx_max = argmax(abs.(real(vals)))
+    stability = 0.5*(abs(vals[idx_min]) + abs(vals[idx_max]))
+
     return TypeAPeriodicOrbit(
-        SA[rx,rz,vy], P, S, N_cross, mu, TU, LU,
+        SA[rx,rz,vy], jacobi, stability, P, S, N_cross, mu, TU, LU,
     )
 end
 """
@@ -437,13 +458,45 @@ function Base.show(
         if isnan(orbit.TU)
             println(io, "  Orbital period:  $(orbit.P) TU")
         else
-            println(io, "  Orbital period:  $(orbit.P*orbit.TU) s")
+            println(io, "  Orbital period:  $(orbit.P*orbit.TU/86400.0) days")
         end
         if isnan(orbit.LU)
             println(io, "  Arc-length:      $(orbit.S) LU")
         else
             println(io, "  Arc-length:      $(orbit.S*orbit.LU) km")
         end
+        if !isnan(orbit.jacobi)
+            println(io, "  Jacobi integral: $(orbit.jacobi)")
+        end
+        if !isnan(orbit.stability)
+            println(io, "  Stability:       $(orbit.stability)")
+        end
         println(io, "  N_cross:         $(orbit.N_cross)")
+    end
+end
+function Base.show(
+    io::IO, ::MIME"text/plain", orbit::GeneralPeriodicOrbit,
+)
+    compact = get(io, :compact, false)
+    if compact
+        println(io, "GeneralPeriodicOrbit")
+    else
+        println(io, "GeneralPeriodicOrbit")
+        if isnan(orbit.TU)
+            println(io, "  Orbital period:  $(orbit.P) TU")
+        else
+            println(io, "  Orbital period:  $(orbit.P*orbit.TU/86400.0) days")
+        end
+        if isnan(orbit.LU)
+            println(io, "  Arc-length:      $(orbit.S) LU")
+        else
+            println(io, "  Arc-length:      $(orbit.S*orbit.LU) km")
+        end
+        if !isnan(orbit.jacobi)
+            println(io, "  Jacobi integral: $(orbit.jacobi)")
+        end
+        if !isnan(orbit.stability)
+            println(io, "  Stability:       $(orbit.stability)")
+        end
     end
 end
