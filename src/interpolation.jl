@@ -24,6 +24,26 @@ struct FastChebInterpolation{IT <: FastChebInterp.ChebPoly} <: AbstractInterpola
 end
 
 """
+    save_interp(file::String, it::FastChebInterpolation{IT}) where IT
+
+Save the interpolation object to a file.
+"""
+function save_interp(file::String, it::FastChebInterpolation{IT}) where IT
+    save(file, Dict(:it => it.it))
+    return nothing
+end
+
+"""
+    load_interp(file::String) -> FastChebInterpolation{IT}
+
+Load an interpolation object from a file.
+"""
+function load_interp(file::String)
+    it = load(file, :it)
+    return FastChebInterpolation(it)
+end
+
+"""
     value(m::FastChebInterpolation{IT}, τ1[, τ2]) where IT -> SVector{6, Float64}
 
 Evaluate the interpolation at the given `τ1` and `τ2` (if employing a bi-variate

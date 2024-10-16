@@ -40,9 +40,9 @@ fig = Figure();
 ax  = Axis3(
     fig[1,1]; 
     aspect = :data,
-    xlabel = L"$r_x$, LU",
-    ylabel = L"$r_y$, LU",
-    zlabel = L"$r_z$, LU",
+    xlabel = L"$r_x$, DU",
+    ylabel = L"$r_y$, DU",
+    zlabel = L"$r_z$, DU",
 )
 lines!(ax, traj[1,:], traj[2,:], traj[3,:])
 fig # hide

@@ -917,3 +917,307 @@ function get_unstable_manifold_trajectory(
         abstol = abstol,
     )
 end
+
+"""
+    generate_stable_manifold_cross_section_cheb_interpolant(
+        man::InvariantManifold, left_pert::Bool,
+        τ1_order::Int, PT1::ParameterizationType,
+        τ2::AbstractFloat, PT2::ParameterizationType;
+        start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+        manifold_length::AbstractFloat = 1.0,
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Int64}}
+
+Generate a Chebyshev interpolant for a cross-section of the stable `InvariantManifold`.
+
+# Arguments
+- `man::InvariantManifold`: The invariant manifold.
+- `left_pert::Bool`: If true, the perturbation is to the left of the periodic orbit.
+- `τ1_order::Int`: The order of the Chebyshev interpolation in the `τ1` direction.
+- `PT1::ParameterizationType`: The parameterization type for the `τ1` parameter.
+- `τ2::AbstractFloat`: The fixed choice for the `τ2` parameter, which specified the location
+    of the fixed manifold cross-section.
+- `PT2::ParameterizationType`: The parameterization type for the `τ2` parameter.
+
+# Keyword Arguments
+- `start_cond::Union{Nothing,Function,AbstractFloat} = nothing`: The starting condition for the
+    manifold trajectory. If a scalar, this specifies the distance from the initial condition on the
+    periodic orbit in terms of `PT2`. If a function, this specifies a termination condition callback
+    function for the solver that will be used to propagate to the initial state of the returned
+    trajectory from the initial condition on the periodic orbit.
+- `manifold_length::AbstractFloat = 1.0`: The length of the manifold, in CRTBP units. Sets
+    the max length of the manifold, where `τ2 = 1.0` corresponds to the full `manifold_length`.
+- `solver = Vern9()`: The DifferentialEquations.jl solver to use.
+- `reltol = 1e-14`: The relative tolerance for the solver.
+- `abstol = 1e-14`: The absolute tolerance for the solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}`: The Chebyshev
+    interpolant for the stable manifold.
+"""
+function generate_stable_manifold_cross_section_cheb_interpolant(
+    man::InvariantManifold, left_pert::Bool,
+    τ1_order::Int, PT1::ParameterizationType,
+    τ2::AbstractFloat, PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+    manifold_length::AbstractFloat = 1.0,
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Generate range of parameter values
+    τ1s = chebpoints(τ1_order, 0.0, 1.0)
+
+    # Loop over parameter values
+    states = Vector{SVector{6,Float64}}(undef, τ1_order+1)
+    for (i, τ1) in enumerate(τ1s)
+        # Get manifold states
+        states[i] = get_stable_manifold_trajectory(
+            man, left_pert, τ1, PT1,
+            start_cond, τ2, PT2;
+            manifold_length = manifold_length,
+            solver          = solver,
+            reltol          = reltol,
+            abstol          = abstol,
+        )[end]
+    end
+
+    return FastChebInterpolation(chebinterp(states, 0.0, 1.0))
+end
+
+"""
+    generate_stable_manifold_cross_section_cheb_approximation(
+        man::InvariantManifold, left_pert::Bool,
+        τ1_order::Int, PT1::ParameterizationType,
+        τ2::AbstractFloat, PT2::ParameterizationType;
+        start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+        manifold_length::AbstractFloat = 1.0,
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{1, SVector{6, Float64}, Int64}}
+
+Generate a Chebyshev interpolant for a cross-section of the stable `InvariantManifold` through
+a least-squares fit to
+
+# Arguments
+- `man::InvariantManifold`: The invariant manifold.
+- `left_pert::Bool`: If true, the perturbation is to the left of the periodic orbit.
+- `τ1_npoints::Int`: The number of points to use in the `τ1` direction.
+- `τ1_order::Int`: The order of the Chebyshev interpolation in the `τ1` direction.
+- `PT1::ParameterizationType`: The parameterization type for the `τ1` parameter.
+- `τ2::AbstractFloat`: The fixed choice for the `τ2` parameter, which specified the location
+    of the fixed manifold cross-section.
+- `PT2::ParameterizationType`: The parameterization type for the `τ2` parameter.
+
+# Keyword Arguments
+- `start_cond::Union{Nothing,Function,AbstractFloat} = nothing`: The starting condition for the
+    manifold trajectory. If a scalar, this specifies the distance from the initial condition on the
+    periodic orbit in terms of `PT2`. If a function, this specifies a termination condition callback
+    function for the solver that will be used to propagate to the initial state of the returned
+    trajectory from the initial condition on the periodic orbit.
+- `manifold_length::AbstractFloat = 1.0`: The length of the manifold, in CRTBP units. Sets
+    the max length of the manifold, where `τ2 = 1.0` corresponds to the full `manifold_length`.
+- `solver = Vern9()`: The DifferentialEquations.jl solver to use.
+- `reltol = 1e-14`: The relative tolerance for the solver.
+- `abstol = 1e-14`: The absolute tolerance for the solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}`: The Chebyshev
+    interpolant for the stable manifold.
+"""
+function generate_stable_manifold_cross_section_cheb_approximation(
+    man::InvariantManifold, left_pert::Bool,
+    τ1_npoints::Int, τ1_order::Int, PT1::ParameterizationType,
+    τ2::AbstractFloat, PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+    manifold_length::AbstractFloat = 1.0,
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Generate range of parameter values
+    τ1s = chebpoints(τ1_npoints - 1, 0.0, 1.0)
+
+    # Loop over parameter values
+    states = Vector{SVector{6,Float64}}(undef, τ1_npoints)
+    for (i, τ1) in enumerate(τ1s)
+        # Get manifold states
+        states[i] = get_stable_manifold_trajectory(
+            man, left_pert, τ1, PT1,
+            start_cond, τ2, PT2;
+            manifold_length = manifold_length,
+            solver          = solver,
+            reltol          = reltol,
+            abstol          = abstol,
+        )[end]
+    end
+
+    return FastChebInterpolation(chebregression(τ1s, states, 0.0, 1.0, τ1_order))
+end
+
+"""
+    generate_stable_manifold_cheb_interpolant(
+        man::InvariantManifold, left_pert::Bool,
+        τ1_order::Int, PT1::ParameterizationType,
+        τ2_order::Int, PT2::ParameterizationType;
+        start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+        manifold_length::AbstractFloat = 1.0,
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}
+
+Generate a Chebyshev interpolant for the stable `InvariantManifold`.
+
+# Arguments
+- `man::InvariantManifold`: The invariant manifold.
+- `left_pert::Bool`: If true, the perturbation is to the left of the periodic orbit.
+- `τ1_order::Int`: The order of the Chebyshev interpolation in the `τ1` direction.
+- `PT1::ParameterizationType`: The parameterization type for the `τ1` parameter.
+- `τ2_order::Int`: The order of the Chebyshev interpolation in the `τ2` direction.
+- `PT2::ParameterizationType`: The parameterization type for the `τ2` parameter.
+
+# Keyword Arguments
+- `start_cond::Union{Nothing,Function,AbstractFloat} = nothing`: The starting condition for the
+    manifold trajectory. If a scalar, this specifies the distance from the initial condition on the
+    periodic orbit in terms of `PT2`. If a function, this specifies a termination condition callback
+    function for the solver that will be used to propagate to the initial state of the returned
+    trajectory from the initial condition on the periodic orbit.
+- `manifold_length::AbstractFloat = 1.0`: The length of the manifold, in CRTBP units. Sets
+    the max length of the manifold, where `τ2 = 1.0` corresponds to the full `manifold_length`.
+- `solver = Vern9()`: The DifferentialEquations.jl solver to use.
+- `reltol = 1e-14`: The relative tolerance for the solver.
+- `abstol = 1e-14`: The absolute tolerance for the solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}`: The Chebyshev
+    interpolant for the stable manifold.
+"""
+function generate_stable_manifold_cheb_interpolant(
+    man::InvariantManifold, left_pert::Bool,
+    τ1_order::Int, PT1::ParameterizationType,
+    τ2_order::Int, PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+    manifold_length::AbstractFloat = 1.0,
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Generate range of parameter values
+    lb = SA[0,0]
+    ub = SA[1,1]
+    τs = chebpoints(SA[τ1_order, τ2_order], lb, ub)
+
+    # These are avoidable allocations, but we only call this once
+    # before using the interp a bunch
+    τ1s = [τs[i,1][1] for i in axes(τs, 1)]
+    τ2s = [τs[1,end - i + 1][2] for i in axes(τs, 2)]
+
+    # Loop over parameter values
+    states = Matrix{SVector{6,Float64}}(undef, τ1_order+1, τ2_order+1)
+    for (i, τ1) in enumerate(τ1s)
+        # Get manifold states
+        τ1_traj = get_stable_manifold_trajectory(
+            man, left_pert, τ1, PT1,
+            start_cond, τ2s, PT2;
+            manifold_length = manifold_length,
+            solver          = solver,
+            reltol          = reltol,
+            abstol          = abstol,
+        )
+        for j in eachindex(τ2s)
+            states[i,j] = τ1_traj[end - j + 1]
+        end
+    end
+
+    return FastChebInterpolation(chebinterp(states, lb, ub))
+end
+
+"""
+    generate_stable_manifold_cheb_approximation(
+        man::InvariantManifold, left_pert::Bool,
+        τ1_npoints::Int, τ1_order::Int, PT1::ParameterizationType,
+        τ2_npoints::Int, τ2_order::Int, PT2::ParameterizationType;
+        start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+        manifold_length::AbstractFloat = 1.0,
+        solver = Vern9(),
+        reltol = 1e-14,
+        abstol = 1e-14,
+    ) -> FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}
+
+Generate a Chebyshev approximation for the stable `InvariantManifold` in terms of `PT1`
+and `PT2` for the parameters `τ1` and `τ2` employing `τ1_npoints` and `τ2_npoints` to a
+Chebyshev polynomial of order `τ1_order` and `τ2_order`, respectively.
+
+# Arguments
+- `man::InvariantManifold`: The invariant manifold.
+- `left_pert::Bool`: If true, the perturbation is to the left of the periodic orbit.
+- `τ1_npoints::Int`: The number of points to use in the `τ1` direction.
+- `τ1_order::Int`: The order of the Chebyshev interpolation in the `τ1` direction.
+- `PT1::ParameterizationType`: The parameterization type for the `τ1` parameter.
+- `τ2_npoints::Int`: The number of points to use in the `τ2` direction.
+- `τ2_order::Int`: The order of the Chebyshev interpolation in the `τ2` direction.
+- `PT2::ParameterizationType`: The parameterization type for the `τ2` parameter.
+
+# Keyword Arguments
+- `start_cond::Union{Nothing,Function,AbstractFloat} = nothing`: The starting condition for the
+    manifold trajectory. If a scalar, this specifies the distance from the initial condition on the
+    periodic orbit in terms of `PT2`. If a function, this specifies a termination condition callback
+    function for the solver that will be used to propagate to the initial state of the returned
+    trajectory from the initial condition on the periodic orbit.
+- `manifold_length::AbstractFloat = 1.0`: The length of the manifold, in CRTBP units. Sets
+    the max length of the manifold, where `τ2 = 1.0` corresponds to the full `manifold_length`.
+- `solver = Vern9()`: The DifferentialEquations.jl solver to use.
+- `reltol = 1e-14`: The relative tolerance for the solver.
+- `abstol = 1e-14`: The absolute tolerance for the solver.
+
+# Returns
+- `FastChebInterpolation{FastChebInterp.ChebPoly{2, SVector{6, Float64}, Int64}}`: The Chebyshev
+    interpolant for the stable manifold.
+"""
+function generate_stable_manifold_cheb_approximation(
+    man::InvariantManifold, left_pert::Bool,
+    τ1_npoints::Int, τ1_order::Int, PT1::ParameterizationType,
+    τ2_npoints::Int, τ2_order::Int, PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
+    manifold_length::AbstractFloat = 1.0,
+    solver = Vern9(),
+    reltol = 1e-14,
+    abstol = 1e-14,
+)
+    # Generate range of parameter values
+    lb = SA[0,0]
+    ub = SA[1,1]
+    τs = chebpoints(SA[τ1_npoints - 1, τ2_npoints - 1], lb, ub)
+
+    # These are avoidable allocations, but we only call this once
+    # before using the interp a bunch
+    τ1s = [τs[i,1][1] for i in axes(τs, 1)]
+    τ2s = [τs[1,end - i + 1][2] for i in axes(τs, 2)]
+
+    # Loop over parameter values
+    idx     = 0
+    xs      = Vector{SVector{2,Float64}}(undef, τ1_npoints*τ2_npoints)
+    states  = Vector{SVector{6,Float64}}(undef, τ1_npoints*τ2_npoints)
+    for (i, τ1) in enumerate(τ1s)
+        # Get manifold states
+        τ1_traj = get_stable_manifold_trajectory(
+            man, left_pert, τ1, PT1,
+            start_cond, τ2s, PT2;
+            manifold_length = manifold_length,
+            solver          = solver,
+            reltol          = reltol,
+            abstol          = abstol,
+        )
+        for j in eachindex(τ2s)
+            idx += 1
+            xs[idx] = SA[τ1, τ2s[j]]
+            states[idx] = τ1_traj[end - j + 1]
+        end
+    end
+
+    return FastChebInterpolation(chebregression(xs, states, lb, ub, (τ1_order, τ2_order)))
+end

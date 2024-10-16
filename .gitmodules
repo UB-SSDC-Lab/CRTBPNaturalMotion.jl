@@ -1,0 +1,3 @@
+[submodule "dep/FastChebInterp.jl"]
+	path = dep/FastChebInterp.jl
+	url = https://github.com/GrantHecht/FastChebInterp.jl.git

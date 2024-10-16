@@ -46,9 +46,9 @@ fig = Figure(; size = (700, 1000))
 ax  = Axis3(
     fig[1,1]; 
     aspect = :data,
-    xlabel = L"$r_x$, LU",
-    ylabel = L"$r_y$, LU",
-    zlabel = L"$r_z$, LU",   
+    xlabel = L"$r_x$, DU",
+    ylabel = L"$r_y$, DU",
+    zlabel = L"$r_z$, DU",   
 )
 
 # Plot every 10 orbits
@@ -62,7 +62,7 @@ import FileIO
 plot_moon(ax, orbit_set) = begin # Defining a function that we can use later
     moon = Sphere(
         Point3f(1.0 - orbit_set.system.mass_ratio, 0.0, 0.0),
-        orbit_set.system.radius_secondary / orbit_set.system.LU
+        orbit_set.system.radius_secondary / orbit_set.system.DU
     )
     mesh!(ax, moon; color = FileIO.load(CairoMakie.assetpath("moon.png")))
 end
@@ -85,9 +85,9 @@ butterfly_fig = Figure()
 butterfly_ax  = Axis3(
     butterfly_fig[1,1]; 
     aspect = :data,
-    xlabel = L"$r_x$, LU",
-    ylabel = L"$r_y$, LU",
-    zlabel = L"$r_z$, LU",   
+    xlabel = L"$r_x$, DU",
+    ylabel = L"$r_y$, DU",
+    zlabel = L"$r_z$, DU",   
 )
 
 # Plot every 100 orbits and moon
@@ -111,14 +111,14 @@ axial_fig = Figure(; size = (800,600))
 axial_ax_xy  = Axis(
     axial_fig[1,1]; 
     aspect = DataAspect(),
-    xlabel = L"$r_x$, LU",
-    ylabel = L"$r_y$, LU",
+    xlabel = L"$r_x$, DU",
+    ylabel = L"$r_y$, DU",
 )
 axial_ax_xz  = Axis(
     axial_fig[1,2]; 
     aspect = DataAspect(),
-    xlabel = L"$r_x$, LU",
-    ylabel = L"$r_z$, LU",
+    xlabel = L"$r_x$, DU",
+    ylabel = L"$r_z$, DU",
 )
 
 # Plot every 200 orbits and moon

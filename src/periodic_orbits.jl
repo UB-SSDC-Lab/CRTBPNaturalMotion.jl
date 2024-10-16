@@ -45,12 +45,12 @@ struct TypeAPeriodicOrbit <: AbstractPeriodicOrbit
 
     # Units
     TU::Float64
-    LU::Float64
+    DU::Float64
 end
 
 """
     TypeAPeriodicOrbit(
-        rx, rz, vy, mu[, TU, LU];
+        rx, rz, vy, mu[, TU, DU];
         N_cross = 1,
         constraint = (:x_start_coordinate, 0.8),
         ode_solver = Vern9(),
@@ -60,7 +60,7 @@ end
     )
 """
 function TypeAPeriodicOrbit(
-    rx, rz, vy, mu, TU = NaN, LU = NaN;
+    rx, rz, vy, mu, TU = NaN, DU = NaN;
     N_cross = 1,
     constraint = (:x_start_coordinate, rx),
     ode_solver = Vern9(),
@@ -108,7 +108,7 @@ function TypeAPeriodicOrbit(
     stability = 0.5*(abs(vals[idx_min]) + abs(vals[idx_max]))
 
     return TypeAPeriodicOrbit(
-        SA[rx,rz,vy], jacobi, stability, P, S, N_cross, mu, TU, LU,
+        SA[rx,rz,vy], jacobi, stability, P, S, N_cross, mu, TU, DU,
     )
 end
 """
@@ -130,7 +130,7 @@ function TypeAPeriodicOrbit(
     nl_solver  = SimpleTrustRegion(autodiff = nothing, nlsolve_update_rule = Val(true)),
 )
     return TypeAPeriodicOrbit(
-        orbit.u0[1], orbit.u0[2], orbit.u0[3], orbit.mu, orbit.TU, orbit.LU;
+        orbit.u0[1], orbit.u0[2], orbit.u0[3], orbit.mu, orbit.TU, orbit.DU;
         N_cross = orbit.N_cross,
         constraint = constraint,
         ode_solver = ode_solver,
@@ -172,7 +172,7 @@ struct GeneralPeriodicOrbit <: AbstractPeriodicOrbit
 
     # Units
     TU::Float64
-    LU::Float64
+    DU::Float64
 end
 
 function GeneralPeriodicOrbit(
@@ -180,7 +180,7 @@ function GeneralPeriodicOrbit(
     jacobi     = NaN,
     stability  = NaN,
     TU         = NaN,
-    LU         = NaN,
+    DU         = NaN,
     ode_solver = Vern9(),
     ode_reltol = 1e-14,
     ode_abstol = 1e-14,
@@ -193,7 +193,7 @@ function GeneralPeriodicOrbit(
         abstol = ode_abstol,
     )
 
-    return GeneralPeriodicOrbit(x0, jacobi, stability, P, S, mu, TU, LU)
+    return GeneralPeriodicOrbit(x0, jacobi, stability, P, S, mu, TU, DU)
 end
 
 """
@@ -460,10 +460,10 @@ function Base.show(
         else
             println(io, "  Orbital period:  $(orbit.P*orbit.TU/86400.0) days")
         end
-        if isnan(orbit.LU)
-            println(io, "  Arc-length:      $(orbit.S) LU")
+        if isnan(orbit.DU)
+            println(io, "  Arc-length:      $(orbit.S) DU")
         else
-            println(io, "  Arc-length:      $(orbit.S*orbit.LU) km")
+            println(io, "  Arc-length:      $(orbit.S*orbit.DU) km")
         end
         if !isnan(orbit.jacobi)
             println(io, "  Jacobi integral: $(orbit.jacobi)")
@@ -487,10 +487,10 @@ function Base.show(
         else
             println(io, "  Orbital period:  $(orbit.P*orbit.TU/86400.0) days")
         end
-        if isnan(orbit.LU)
-            println(io, "  Arc-length:      $(orbit.S) LU")
+        if isnan(orbit.DU)
+            println(io, "  Arc-length:      $(orbit.S) DU")
         else
-            println(io, "  Arc-length:      $(orbit.S*orbit.LU) km")
+            println(io, "  Arc-length:      $(orbit.S*orbit.DU) km")
         end
         if !isnan(orbit.jacobi)
             println(io, "  Jacobi integral: $(orbit.jacobi)")

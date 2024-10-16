@@ -8,7 +8,7 @@ struct System
     L3::SVector{3, Float64}
     L4::SVector{3, Float64}
     L5::SVector{3, Float64}
-    LU::Float64
+    DU::Float64
     TU::Float64
 
     function System(json_sys::JSONSystem)
@@ -183,10 +183,22 @@ function Base.show(io::IO, ::MIME"text/plain", os::OrbitSet)
 end
 
 """
-    get_jpl_orbits(; sys = "earth-moon", family = "halo", libr = 1, branch = "N",
-                     periodmin = nothing, periodmax = nothing, periodunits = nothing,
-                     jacobimin = nothing, jacobimax = nothing, stabmin = nothing, stabmax = nothing,
-                     ode_solver = Vern9(), ode_reltol = 1e-14, ode_abstol = 1e-14)
+    get_jpl_orbits(;
+        sys         = "earth-moon",
+        family      = "halo",
+        libr        = 1,
+        branch      = "N",
+        periodmin   = nothing,
+        periodmax   = nothing,
+        periodunits = nothing,
+        jacobimin   = nothing,
+        jacobimax   = nothing,
+        stabmin     = nothing,
+        stabmax     = nothing,
+        ode_solver  = Vern9(),
+        ode_reltol  = 1e-14,
+        ode_abstol  = 1e-14,
+    )
 
 Get periodic orbits from the JPL CRTBP Periodic Orbit API. See JPL's [web application](https://ssd.jpl.nasa.gov/tools/periodic_orbits.html)
 and [API documentation](https://ssd-api.jpl.nasa.gov/doc/periodic_orbits.html) for details.
@@ -305,7 +317,7 @@ function get_jpl_orbits(
     # Get mass ratio and units
     mu = orbit_data.system.mass_ratio
     TU = orbit_data.system.tunit
-    LU = orbit_data.system.lunit
+    DU = orbit_data.system.lunit
 
     # Allocate memory for orbits and compute
     orbits = Vector{GeneralPeriodicOrbit}(undef, orbit_data.count)
@@ -325,7 +337,7 @@ function get_jpl_orbits(
         orbits[i] = GeneralPeriodicOrbit(
             x0, P, mu;
             TU         = TU,
-            LU         = LU,
+            DU         = DU,
             jacobi     = jacobi,
             stability  = stability,
             ode_solver = ode_solver,

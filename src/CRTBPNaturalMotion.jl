@@ -4,6 +4,7 @@ using Reexport
 @reexport using StaticArrays
 @reexport using OrdinaryDiffEq
 
+using JLD2
 using FastChebInterp
 using Format
 using LinearAlgebra
@@ -56,6 +57,11 @@ export generate_periodic_orbit_cheb_approximation
 export InvariantManifold
 export get_stable_manifold_trajectory
 export get_unstable_manifold_trajectory
+export generate_stable_manifold_cross_section_cheb_interpolant
+export generate_stable_manifold_cross_section_cheb_approximation
+export generate_stable_manifold_cheb_interpolant
+export generate_stable_manifold_cheb_approximation
+export save_interp, load_interp
 
 # JPL API
 export get_jpl_orbits
