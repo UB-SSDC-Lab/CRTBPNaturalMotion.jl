@@ -1215,7 +1215,7 @@ function generate_stable_manifold_cheb_approximation(
         for j in eachindex(τ2s)
             idx += 1
             xs[idx] = SA[τ1, τ2s[j]]
-            states[idx] = τ1_traj[end - j + 1]
+            states[idx] = τ1_traj[j]
         end
     end
 

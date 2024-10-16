@@ -29,7 +29,7 @@ end
 Save the interpolation object to a file.
 """
 function save_interp(file::String, it::FastChebInterpolation{IT}) where IT
-    save(file, Dict(:it => it.it))
+    save(file, Dict("it" => it.it))
     return nothing
 end
 
@@ -39,7 +39,7 @@ end
 Load an interpolation object from a file.
 """
 function load_interp(file::String)
-    it = load(file, :it)
+    it = load(file, "it")
     return FastChebInterpolation(it)
 end
 
