@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Querying the JPL API · CRTBPNaturalMotion.jl</title><meta name="title" content="Querying the JPL API · CRTBPNaturalMotion.jl"/><meta property="og:title" content="Querying the JPL API · CRTBPNaturalMotion.jl"/><meta property="twitter:title" content="Querying the JPL API · CRTBPNaturalMotion.jl"/><meta name="description" content="Documentation for CRTBPNaturalMotion.jl."/><meta property="og:description" content="Documentation for CRTBPNaturalMotion.jl."/><meta property="twitter:description" content="Documentation for CRTBPNaturalMotion.jl."/><meta property="og:url" content="https://UB-SSDC-Lab.github.io/CRTBPNaturalMotion.jl/jpl_api_example/"/><meta property="twitter:url" content="https://UB-SSDC-Lab.github.io/CRTBPNaturalMotion.jl/jpl_api_example/"/><link rel="canonical" href="https://UB-SSDC-Lab.github.io/CRTBPNaturalMotion.jl/jpl_api_example/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">CRTBPNaturalMotion.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../periodic_orbit_example/">Computing Halo Orbits</a></li><li class="is-active"><a class="tocitem" href>Querying the JPL API</a><ul class="internal"><li><a class="tocitem" href="#Earth-Moon-Halo-orbits"><span>Earth-Moon Halo orbits</span></a></li><li class="toplevel"><a class="tocitem" href="#Quick-examples"><span>Quick examples</span></a></li></ul></li><li><a class="tocitem" href="../interpolation_example/">Interpolation</a></li></ul></li><li><span class="tocitem">Reference</span><ul><li><a class="tocitem" href="../lib/public/">Public API</a></li><li><a class="tocitem" href="../lib/public/jpl_orbits/">Querying JPL Catelog</a></li><li><a class="tocitem" href="../lib/public/orbit_computation/">Periodic Orbit Computation</a></li><li><a class="tocitem" href="../lib/public/manifolds/">Stable/Unstable Manifolds</a></li><li><a class="tocitem" href="../lib/public/propagation/">Propagation</a></li><li><a class="tocitem" href="../lib/public/type_flags/">Type Flags</a></li><li><a class="tocitem" href="../lib/public/utilities/">Utilities</a></li></ul></li><li><span class="tocitem">Developer</span><ul><li><a class="tocitem" href="../lib/internal/temp/">Internals</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Querying the JPL API</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Querying the JPL API</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/UB-SSDC-Lab/CRTBPNaturalMotion.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/UB-SSDC-Lab/CRTBPNaturalMotion.jl/blob/main/docs/src/jpl_api_example.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Querying-JPL&#39;s-CRTBP-Poincare-Catalog-of-Periodic-Orbits"><a class="docs-heading-anchor" href="#Querying-JPL&#39;s-CRTBP-Poincare-Catalog-of-Periodic-Orbits">Querying JPL&#39;s CRTBP Poincare Catalog of Periodic Orbits</a><a id="Querying-JPL&#39;s-CRTBP-Poincare-Catalog-of-Periodic-Orbits-1"></a><a class="docs-heading-anchor-permalink" href="#Querying-JPL&#39;s-CRTBP-Poincare-Catalog-of-Periodic-Orbits" title="Permalink"></a></h1><p><code>CRTBPNaturalMotion.jl</code> provides an interface to JPL&#39;s CRTBP Poincare catalog of periodic orbits through the exported function <code>get_jpl_orbits</code>. Through several keyword arguments (see the <a href="../lib/public/jpl_orbits/#CRTBPNaturalMotion.get_jpl_orbits-Tuple{String}"><code>get_jpl_orbits</code></a> docstring), which directly correspond to the in JPL&#39;s <a href="https://ssd.jpl.nasa.gov/tools/periodic_orbits.html">web application</a> and <a href="https://ssd-api.jpl.nasa.gov/doc/periodic_orbits.html">API documentation</a>, an <code>OrbitSet</code> of periodic orbits can be obtained for various three-body systems (e.g., Earth-Moon, Sun-Earth, Saturn-Enceladus, etc...).</p><h2 id="Earth-Moon-Halo-orbits"><a class="docs-heading-anchor" href="#Earth-Moon-Halo-orbits">Earth-Moon Halo orbits</a><a id="Earth-Moon-Halo-orbits-1"></a><a class="docs-heading-anchor-permalink" href="#Earth-Moon-Halo-orbits" title="Permalink"></a></h2><p>As a simple example, we can obtain the full set of periodic orbits about the <span>$L_1$</span> Libration point as follows:</p><pre><code class="language-julia hljs">using CRTBPNaturalMotion
+
+orbits = get_jpl_orbits(;
+    sys     = &quot;earth-moon&quot;,
+    family  = &quot;halo&quot;,
+    libr    = 1,
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OrbitSet with 5731 orbits
+	System:            Earth-Moon
+	Period range:      7.9951 to 13.8446 days
+	Jacobi range:      0.1952 to 3.1743
+	Stability range:   1.0000 to 1180.4065
+</code></pre><p>As can be seen, a total of 5731 orbits are contained within the <code>OrbitSet</code> exhibiting a range of different orbital periods, Jacobi constants, and stability values. </p><p>Perhaps we&#39;re only interested in halo orbits exhibiting a stability index that is less than 5, with orbital periods between 10 and 11 days. We can refine our query using some additional keyword arguments as follows:</p><pre><code class="language-julia hljs">stable_orbits = get_jpl_orbits(;
+    sys         = &quot;earth-moon&quot;,
+    family      = &quot;halo&quot;,
+    libr        = 1,
+    periodmin   = 10.0,
+    periodmax   = 11.0,
+    periodunits = &quot;d&quot;,
+    stabmax     = 5.0,
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OrbitSet with 138 orbits
+	System:            Earth-Moon
+	Period range:     10.0059 to 10.7603 days
+	Jacobi range:      2.9017 to 3.0009
+	Stability range:   1.2917 to 4.9677
+</code></pre><p>The returned <code>OrbitSet</code> is implemented as a sub-type of Julia&#39;s <code>AbstractVector{T}</code> and therefore functions such as <code>length(::OrbitSet)</code> and indexing, i.e., </p><pre><code class="language-julia hljs">first_orbit = stable_orbits[1]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">GeneralPeriodicOrbit
+  Orbital period:  10.43428986161004 days
+  Arc-length:      290286.3896742448 km
+  Jacobi integral: 2.90165039860189
+  Stability:       4.96768347393297
+</code></pre><p>and </p><pre><code class="language-julia hljs">stable_orbits_subset = stable_orbits[[3,5,10,12]]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OrbitSet with 4 orbits
+	System:            Earth-Moon
+	Period range:     10.3453 to 10.4183 days
+	Jacobi range:      2.9025 to 2.9064
+	Stability range:   4.4793 to 4.8779
+</code></pre><p>can be employed to obtain a single <code>GeneralPeriodicOrbit</code> or a subset of the original <code>OrbitSet</code>. Note that an <code>OrbitSet</code> is essentially a <code>Vector{GeneralPeriodicOrbit}</code> with some extra information about the three-body <code>System</code> and the contained periodic orbits. </p><p>We can obtain a full trajectory for the periodic orbit as shown in <a href="../periodic_orbit_example/#Computing-Halo-Orbits">Computing Halo Orbits</a> using the <code>get_full_orbit</code> method. For example, several orbits within <code>stable_orbits</code> can be plotted using <code>CairoMakie.jl</code> as follows:</p><pre><code class="language-julia hljs">using CairoMakie
+
+fig = Figure(; size = (700, 1000))
+ax  = Axis3(
+    fig[1,1];
+    aspect = :data,
+    xlabel = L&quot;$r_x$, DU&quot;,
+    ylabel = L&quot;$r_y$, DU&quot;,
+    zlabel = L&quot;$r_z$, DU&quot;,
+)
+
+# Plot every 10 orbits
+for i in 1:10:length(stable_orbits)
+    traj = get_full_orbit(stable_orbits[i])
+    lines!(ax, traj[1,:], traj[2,:], traj[3,:]; color = :blue)
+end
+
+#  Plot the moon
+import FileIO
+plot_moon(ax, orbit_set) = begin # Defining a function that we can use later
+    moon = Sphere(
+        Point3f(1.0 - orbit_set.system.mass_ratio, 0.0, 0.0),
+        orbit_set.system.radius_secondary / orbit_set.system.DU
+    )
+    mesh!(ax, moon; color = FileIO.load(CairoMakie.assetpath(&quot;moon.png&quot;)))
+end
+plot_moon(ax, stable_orbits)</code></pre><p><img src="../jpl_halos.svg" alt/></p><h1 id="Quick-examples"><a class="docs-heading-anchor" href="#Quick-examples">Quick examples</a><a id="Quick-examples-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-examples" title="Permalink"></a></h1><h3 id="Plotting-a-subset-of-the-Earth-Moon-Butterfly-orbits"><a class="docs-heading-anchor" href="#Plotting-a-subset-of-the-Earth-Moon-Butterfly-orbits">Plotting a subset of the Earth-Moon Butterfly orbits</a><a id="Plotting-a-subset-of-the-Earth-Moon-Butterfly-orbits-1"></a><a class="docs-heading-anchor-permalink" href="#Plotting-a-subset-of-the-Earth-Moon-Butterfly-orbits" title="Permalink"></a></h3><pre><code class="language-julia hljs">butterfly_orbits = get_jpl_orbits(;
+    sys         = &quot;earth-moon&quot;,
+    family      = &quot;butterfly&quot;,
+    periodmin   = 12.0,
+    periodmax   = 15.0,
+    periodunits = &quot;d&quot;,
+)
+
+butterfly_fig = Figure()
+butterfly_ax  = Axis3(
+    butterfly_fig[1,1];
+    aspect = :data,
+    xlabel = L&quot;$r_x$, DU&quot;,
+    ylabel = L&quot;$r_y$, DU&quot;,
+    zlabel = L&quot;$r_z$, DU&quot;,
+)
+
+# Plot every 100 orbits and moon
+for i in 1:100:length(butterfly_orbits)
+    traj = get_full_orbit(butterfly_orbits[i])
+    lines!(butterfly_ax, traj[1,:], traj[2,:], traj[3,:]; color = :blue)
+end
+plot_moon(butterfly_ax, butterfly_orbits)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CairoMakie.Screen{SVG}
+</code></pre><p><img src="../jpl_butterflys.svg" alt/></p><h3 id="Plotting-all-of-the-Earth-Moon-Axial-orbits-about-L_4"><a class="docs-heading-anchor" href="#Plotting-all-of-the-Earth-Moon-Axial-orbits-about-L_4">Plotting all of the Earth-Moon Axial orbits about <span>$L_4$</span></a><a id="Plotting-all-of-the-Earth-Moon-Axial-orbits-about-L_4-1"></a><a class="docs-heading-anchor-permalink" href="#Plotting-all-of-the-Earth-Moon-Axial-orbits-about-L_4" title="Permalink"></a></h3><pre><code class="language-julia hljs">axial_orbits = get_jpl_orbits(;
+    sys         = &quot;earth-moon&quot;,
+    family      = &quot;axial&quot;,
+    libr        = 4,
+)
+
+axial_fig = Figure(; size = (800,600))
+axial_ax_xy  = Axis(
+    axial_fig[1,1];
+    aspect = DataAspect(),
+    xlabel = L&quot;$r_x$, DU&quot;,
+    ylabel = L&quot;$r_y$, DU&quot;,
+)
+axial_ax_xz  = Axis(
+    axial_fig[1,2];
+    aspect = DataAspect(),
+    xlabel = L&quot;$r_x$, DU&quot;,
+    ylabel = L&quot;$r_z$, DU&quot;,
+)
+
+# Plot every 200 orbits and moon
+for i in 1:200:length(axial_orbits)
+    traj = get_full_orbit(axial_orbits[i])
+    lines!(axial_ax_xy, traj[1,:], traj[2,:]; color = :blue)
+    lines!(axial_ax_xz, traj[2,:], traj[3,:]; color = :blue)
+end</code></pre><p><img src="../jpl_axial.svg" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../periodic_orbit_example/">« Computing Halo Orbits</a><a class="docs-footer-nextpage" href="../interpolation_example/">Interpolation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Wednesday 23 October 2024 21:41">Wednesday 23 October 2024</span>. Using Julia version 1.11.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
