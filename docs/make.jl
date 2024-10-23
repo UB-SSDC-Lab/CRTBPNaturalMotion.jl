@@ -15,8 +15,8 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Examples" => [
-            #"Computing Halo Orbits" => "periodic_orbit_example.md",
-            #"Querying the JPL API"  => "jpl_api_example.md",
+            "Computing Halo Orbits" => "periodic_orbit_example.md",
+            "Querying the JPL API"  => "jpl_api_example.md",
             "Interpolation"         => "interpolation_example.md",
         ],
         "Reference" => [

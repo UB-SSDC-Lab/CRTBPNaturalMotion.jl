@@ -40,7 +40,6 @@ can be employed to obtain a single `GeneralPeriodicOrbit` or a subset of the ori
 We can obtain a full trajectory for the periodic orbit as shown in [Computing Halo Orbits](@ref) using the `get_full_orbit` method. For example, several orbits within `stable_orbits` can be plotted using `CairoMakie.jl` as follows:
 ```@example jpl_api
 using CairoMakie
-CairoMakie.activate!(type = "png") # hide
 
 fig = Figure(; size = (700, 1000))
 ax  = Axis3(
@@ -67,8 +66,10 @@ plot_moon(ax, orbit_set) = begin # Defining a function that we can use later
     mesh!(ax, moon; color = FileIO.load(CairoMakie.assetpath("moon.png")))
 end
 plot_moon(ax, stable_orbits)
-fig # hide
+save("jpl_halos.svg", fig); nothing # hide
 ```
+
+![](jpl_halos.svg)
 
 # Quick examples
 ### Plotting a subset of the Earth-Moon Butterfly orbits 
@@ -96,8 +97,10 @@ for i in 1:100:length(butterfly_orbits)
     lines!(butterfly_ax, traj[1,:], traj[2,:], traj[3,:]; color = :blue)
 end
 plot_moon(butterfly_ax, butterfly_orbits)
-butterfly_fig # hide
+save("jpl_butterflys.svg", butterfly_fig) # hide
 ```
+
+![](jpl_butterflys.svg)
 
 ### Plotting all of the Earth-Moon Axial orbits about ``L_4``
 ```@example jpl_api
@@ -127,6 +130,8 @@ for i in 1:200:length(axial_orbits)
     lines!(axial_ax_xy, traj[1,:], traj[2,:]; color = :blue)
     lines!(axial_ax_xz, traj[2,:], traj[3,:]; color = :blue)
 end
-axial_fig # hide
+save("jpl_axial.svg", axial_fig); nothing # hide
 ```
+
+![](jpl_axial.svg)
 
