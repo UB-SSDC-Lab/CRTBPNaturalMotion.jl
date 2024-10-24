@@ -66,10 +66,8 @@ plot_moon(ax, orbit_set) = begin # Defining a function that we can use later
     mesh!(ax, moon; color = FileIO.load(CairoMakie.assetpath("moon.png")))
 end
 plot_moon(ax, stable_orbits)
-save("jpl_halos.svg", fig); nothing # hide
+fig # hide
 ```
-
-![](jpl_halos.svg)
 
 # Quick examples
 ### Plotting a subset of the Earth-Moon Butterfly orbits 
@@ -97,10 +95,8 @@ for i in 1:100:length(butterfly_orbits)
     lines!(butterfly_ax, traj[1,:], traj[2,:], traj[3,:]; color = :blue)
 end
 plot_moon(butterfly_ax, butterfly_orbits)
-save("jpl_butterflys.svg", butterfly_fig) # hide
+butterfly_fig # hide
 ```
-
-![](jpl_butterflys.svg)
 
 ### Plotting all of the Earth-Moon Axial orbits about ``L_4``
 ```@example jpl_api
@@ -130,8 +126,5 @@ for i in 1:200:length(axial_orbits)
     lines!(axial_ax_xy, traj[1,:], traj[2,:]; color = :blue)
     lines!(axial_ax_xz, traj[2,:], traj[3,:]; color = :blue)
 end
-save("jpl_axial.svg", axial_fig); nothing # hide
+axial_fig # hide
 ```
-
-![](jpl_axial.svg)
-

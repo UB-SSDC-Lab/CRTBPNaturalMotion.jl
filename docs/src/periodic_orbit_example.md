@@ -45,10 +45,8 @@ ax  = Axis3(
     zlabel = L"$r_z$, DU",
 )
 lines!(ax, traj[1,:], traj[2,:], traj[3,:])
-save("halo_orbit_plot.svg", fig); nothing # hide
+fig # hide
 ```
-
-![](halo_orbit_plot.svg)
 
 Let's now try to compute a bunch of periodic orbits using a natural continuation based approach, where we'll gradually adjust the value of the `constraint` while solving for new periodic orbits repeatedly (taking the previous solution as the next initial guess). Note that there are much better methods of performing continuation to compute *families* of periodic orbit, but this is quick example that is simple to implement.
 ```@example simple_halo
@@ -79,7 +77,5 @@ for (i, C) in enumerate(Cs)
         lines!(ax, new_traj[1,:], new_traj[2,:], new_traj[3,:]; color = :red)
     end
 end
-save("halo_orbit_cont_plot.svg", fig); nothing # hide
+fig #hide
 ```
-
-![](halo_orbit_cont_plot.svg)

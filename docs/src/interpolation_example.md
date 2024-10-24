@@ -16,9 +16,9 @@ All periodic orbits in `CRTBPNaturalMotion.jl` can be approximated via Chebyshev
         periodmax   = 21.0,
         periodunits = "d",
     )[1]
-```
+``` 
 
-Next, we'll create two different `FastChebInterpolation`s, one representing an interpolation of the periodic orbit, and another representing an approximation of the orbit employing a least-squares fit to a Chebyshev polynomial of the same order. Note that we'll generate both as functions of the scaled `ArcLength`, i.e., `τ` ``\in [0, 1]``.
+Next, we'll create two different `FastChebInterpolation`s, one representing an interpolation of the periodic orbit, and another representing an approximation of the orbit employing a least-squares fit to a Chebyshev polynomial of the same order. Note that we'll generate both as functions of the scaled `ArcLength` about one full period of the orbit, i.e., `τ` ``\in [0, 1]``.
 
 ```@example interpolation
     # Define order of both polynomials
@@ -43,7 +43,7 @@ Next, we'll create two different `FastChebInterpolation`s, one representing an i
     println(value(orbit_lsqf, τ))
 ```
 
-Clearly, we get similar values from either polynomial representation. Note we can also easily compute the Jacobian of the polynomial approximations with: 
+Clearly, we get similar values from either polynomial representation. Note we can also easily compute the derivative of the polynomial approximations with: 
 ```@example interpolation
     jacobian(orbit_lsqf, τ) 
 ```
@@ -99,15 +99,13 @@ Let's now see the approximation error using both methods.
         color       = :blue,
         label       = "Interpolation",
     )
-    save("halo_orbit_approx_error.svg", fig); nothing # hide
+    fig # hide
 ```
-
-![](halo_orbit_approx_error.svg)
 
 As can be seen, both approximations are quite good, with the least-squares approximation exhibiting the smallest maximum error whereas the interpolation exhibits smaller error for values of the parameter ``\tau`` near the boundaries.
 
 ## Stable Invariant Manifold
-All `InvariantManifold`s in `CRTBPNaturalMotion.jl` can also be approximated with Chebyshev polynomials. We can construct a bi-variate approximation of a full manifold surface or a uni-variate approximation of a manifold cross-section (both with interpolation and least-squares regression). To demonstrate this, we'll first construct an `InvariantManifold` for an ``L_1`` halo orbit as follows:
+All `InvariantManifold`s in `CRTBPNaturalMotion.jl` can also be approximated with Chebyshev polynomials. We can construct a bi-variate approximation of a full manifold surface or a uni-variate approximation of a manifold cross-section (both with interpolation and least-squares regression). To demonstrate this, we'll first plot trajectories that lie on the stable invariant manifold of an ``L_1`` halo orbit as follows:
 
 ```@example interpolation
     # Define halo orbit and manifold
@@ -143,12 +141,10 @@ All `InvariantManifold`s in `CRTBPNaturalMotion.jl` can also be approximated wit
         lines!(ax, init_man_traj[1,:], init_man_traj[2,:]; color = (:black, 0.5))
         lines!(ax, man_traj[1,:], man_traj[2,:]; color = :blue)
     end
-    save("stable_manifold_plot.svg", fig); nothing # hide
+    fig # hide
 ```
 
-![](stable_manifold_plot.svg)
-
-Note that we're specifying that we're only interested in the last ``8 \times 10^5`` km of the stable manifold, such that `τ2 = 1.0` corresponds states on the manifold that are a distance of ``8 \times 10^5`` km, in terms of `ArcLength` along the manifold. 
+Note that the blue portions of each trajectory correspond to the part of the stable invariant manifold that will be considered while the grey portions will be ignored, i.e., we'll ignore part of the manifold that lies very close to the halo orbit (i.e., the last 0.75 DU in terms of the `ArcLength` along the manifold), and will consider a portion of the manifold with a length of ``6 \times 10^5`` km of the stable manifold in terms of the `ArcLength`. As such, `τ2 = 1.0` corresponds to states on the manifold that are a distance of ``6 \times 10^5 + 0.75 \times`` `halo.DU` km, in terms of `ArcLength` along the manifold. 
 
 ### Approximation of a Manifold Cross-Section
 
@@ -189,10 +185,8 @@ Let's first consider approximating a single cross section of this stable manifol
         lines!(ax, man_traj[1,:], man_traj[2,:]; color = (:black, 0.5))
     end
 
-    save("manifold_cross_section_plot.svg", fig); nothing # hide
+    fig # hide
 ```
-
-![](manifold_cross_section_plot.svg)
 
 The Chebyshev polynomial approximations can be constructed with:
 ```@example interpolation
@@ -263,10 +257,8 @@ Again, lets look at the approximation error using both methods by plotting with 
         color       = :blue,
         label       = "Interpolation",
     )
-    save("manifold_cross_section_approx_error.svg", fig); nothing # hide
+    fig # hide
 ```
-
-![](manifold_cross_section_approx_error.svg)
 
 ### Approximation of a Full Manifold Surface
 Finally, we'll compute an approximation of the full `InvariantManifold` surface. In the following code example, we'll construct an interpolant of the full manifold and will compute the approximation error.
@@ -286,19 +278,11 @@ Finally, we'll compute an approximation of the full `InvariantManifold` surface.
         manifold_length = man_length, 
     )
 
-    # Construct the least-squares approximation
-    man_lsqf = generate_stable_manifold_cheb_approximation(
-        man, true, τ1_npoints, τ1_order, ArcLength, τ2_npoints, τ2_order, ArcLength;
-        start_cond = man_start,
-        manifold_length = man_length, 
-    )
-
     # Compute manifold interpolation error
     N = 1000
     τ1_check_steps = range(0.0, 1.0, length = N)
     τ2_check_steps = range(0.0, 1.0, length = N)
     interp_errors  = zeros(6, N, N)
-    lsqf_errors    = zeros(6, N, N)
     for (i,τ1) in enumerate(τ1_check_steps)
         manifold_states = get_stable_manifold_trajectory(
             man, true, τ1, ArcLength, man_start, τ2_check_steps, ArcLength;
@@ -308,9 +292,7 @@ Finally, we'll compute an approximation of the full `InvariantManifold` surface.
             τ2 = τ2_check_steps[j]
             prop_val = manifold_states[j]
             interp_val = value(man_interp, τ1, τ2)
-            lsqf_val = value(man_lsqf, τ1, τ2)
             interp_errors[:,i,j] .= interp_val - prop_val
-            lsqf_errors[:,i,j] .= lsqf_val - prop_val
         end
     end
 
@@ -321,17 +303,5 @@ Finally, we'll compute an approximation of the full `InvariantManifold` surface.
         ax1, τ1_check_steps, τ2_check_steps, interp_errors[1,:,:]*(halo.DU*1000.0); 
         colormap = :viridis,
     )
-
-    fig2 = Figure()
-    ax2 = Axis3(fig2[2,1]; xlabel=L"\tau_1", ylabel=L"\tau_2", zlabel=L"$r_x$ error, m")
-    surface!(
-        ax2, τ1_check_steps, τ2_check_steps, lsqf_errors[1,:,:]*(halo.DU*1000.0); 
-        colormap = :viridis,
-    )
-    save("man_interp_error.svg", fig1); nothing # hide
-    save("man_lsqf_error.svg", fig2); nothing # hide
+    fig1 # hide
 ```
-
-![](man_interp_error.svg)
-
-![](man_lsqf_error.svg)
