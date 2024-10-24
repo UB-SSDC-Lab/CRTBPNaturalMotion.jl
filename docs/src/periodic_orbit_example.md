@@ -77,5 +77,5 @@ for (i, C) in enumerate(Cs)
         lines!(ax, new_traj[1,:], new_traj[2,:], new_traj[3,:]; color = :red)
     end
 end
-fig # hide
+fig #hide
 ```
