@@ -63,6 +63,22 @@ function typeA_shooting_function(
     # Full constraint vector and return
     return SA[xf[2], xf[4], xf[6], F4]
 end
+function typeA_shooting_function!(
+    du::AbstractVector{T}, u::AbstractVector{T}, p;
+    constraint  = (:x_start_coordinate, 0.0),
+    solver      = Vern9(),
+    reltol      = 1e-14,
+    abstol      = 1e-14,
+) where T
+    du .= typeA_shooting_function(
+        SA[u[1], u[2], u[3], u[4]], p;
+        constraint = constraint,
+        solver     = solver,
+        reltol     = reltol,
+        abstol     = abstol,
+    )
+end
+
 
 """
     typeA_shooting_jacobian(u, p; constraint = (:x_start_coordinate, 0.0))
@@ -131,4 +147,19 @@ function typeA_shooting_jacobian(
         STM[6,1] STM[6,3] STM[6,5] dxf[6];
            J4[1]    J4[2]    J4[3]    0.0;
     ]
+end
+function typeA_shooting_jacobian!(
+    J::AbstractMatrix{T}, u::AbstractVector{T}, p;
+    constraint  = (:x_start_coordinate, 0.0),
+    solver      = Vern9(),
+    reltol      = 1e-14,
+    abstol      = 1e-14,
+) where T
+    J .= typeA_shooting_jacobian(
+        SA[u[1], u[2], u[3], u[4]], p;
+        constraint = constraint,
+        solver     = solver,
+        reltol     = reltol,
+        abstol     = abstol,
+    )
 end
