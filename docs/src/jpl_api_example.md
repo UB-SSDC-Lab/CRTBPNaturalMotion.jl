@@ -40,7 +40,6 @@ can be employed to obtain a single `GeneralPeriodicOrbit` or a subset of the ori
 We can obtain a full trajectory for the periodic orbit as shown in [Computing Halo Orbits](@ref) using the `get_full_orbit` method. For example, several orbits within `stable_orbits` can be plotted using `CairoMakie.jl` as follows:
 ```@example jpl_api
 using CairoMakie
-CairoMakie.activate!(type = "png") # hide
 
 fig = Figure(; size = (700, 1000))
 ax  = Axis3(
@@ -129,4 +128,3 @@ for i in 1:200:length(axial_orbits)
 end
 axial_fig # hide
 ```
-

@@ -77,7 +77,7 @@ Evaluate the Jacobian of the interpolation at the given `τ1` for a uni-variate 
 - `SVector{6, Float64}`: The Jacobian of the interpolation.
 """
 function jacobian(m::FastChebInterpolation{IT}, τ1) where IT
-    return chebjaconian(m.it, τ1)[2]
+    return chebjacobian(m.it, τ1)[2]
 end
 
 """
@@ -94,5 +94,5 @@ Evaluate the Jacobian of the interpolation at the given `τ1` and `τ2` for a bi
 - `SMatrix{6, 2, Float64, 12}`: The Jacobian of the interpolation.
 """
 function jacobian(m::FastChebInterpolation{IT}, τ1, τ2) where IT
-    return chebjaconian(m.it, SA[τ1, τ2])[2]
+    return chebjacobian(m.it, SA[τ1, τ2])[2]
 end
