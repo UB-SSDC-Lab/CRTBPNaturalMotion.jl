@@ -3,7 +3,7 @@
 
 And abstract type that is used to define the interface for interpolation objects.
 """
-abstract type AbstractInterpolationWrapper end
+abstract type AbstractInterpolationWrapper{N} end
 
 """
     FastChebInterpolation(it::IT) <: AbstractInterpolationWrapper
@@ -15,11 +15,13 @@ for details).
 # Fields
 - `it::IT`: The `FastChebInterp.ChebPoly` struct.
 """
-struct FastChebInterpolation{IT <: FastChebInterp.ChebPoly} <: AbstractInterpolationWrapper
-    it::IT
+struct FastChebInterpolation{N, T, Td} <: AbstractInterpolationWrapper{N}
+    it::FastChebInterp.ChebPoly{N, T, Td}
 
-    function FastChebInterpolation(it::IT) where IT
-        new{IT}(it)
+    function FastChebInterpolation(
+        it::FastChebInterp.ChebPoly{N,T,Td}
+    ) where {N, T, Td}
+        new{N, T, Td}(it)
     end
 end
 
@@ -28,7 +30,7 @@ end
 
 Save the interpolation object to a file.
 """
-function save_interp(file::String, it::FastChebInterpolation{IT}) where IT
+function save_interp(file::String, it::FastChebInterpolation)
     save(file, Dict("it" => it.it))
     return nothing
 end
@@ -44,7 +46,7 @@ function load_interp(file::String)
 end
 
 """
-    value(m::FastChebInterpolation{IT}, τ1[, τ2]) where IT -> SVector{6, Float64}
+    value(m::FastChebInterpolation{N}, τ1[, τ2]) -> SVector{6, Float64}
 
 Evaluate the interpolation at the given `τ1` and `τ2` (if employing a bi-variate
 interpolation).
@@ -57,15 +59,15 @@ interpolation).
 # Returns
 - `SVector{6, Float64}`: The interpolated state.
 """
-function value(m::FastChebInterpolation{IT}, τ1) where IT
+function value(m::FastChebInterpolation{1}, τ1)
     return m.it(τ1)
 end
-function value(m::FastChebInterpolation{IT}, τ1, τ2) where IT
+function value(m::FastChebInterpolation{2}, τ1, τ2)
     return m.it(SA[τ1, τ2])
 end
 
 """
-    jacobian(m::FastChebInterpolation{IT}, τ1) where IT -> SVector{6, Float64}
+    jacobian(m::FastChebInterpolation{1}, τ1) where IT -> SMatrix{6, 1, Float64, 6}
 
 Evaluate the Jacobian of the interpolation at the given `τ1` for a uni-variate interpolation.
 
@@ -74,14 +76,28 @@ Evaluate the Jacobian of the interpolation at the given `τ1` for a uni-variate 
 - `τ1`: The variable.
 
 # Returns
-- `SVector{6, Float64}`: The Jacobian of the interpolation.
+- `SMatrix{6, 1, Float64, 6}`: The Jacobian of the interpolation.
 """
-function jacobian(m::FastChebInterpolation{IT}, τ1) where IT
+function jacobian(m::FastChebInterpolation{1}, τ1)
     return chebjacobian(m.it, τ1)[2]
 end
 
 """
-    jacobian(m::FastChebInterpolation{IT}, τ1, τ2) where IT -> SMatrix{6, 2, Float64, 12}
+    derivative(m::FastChebInterpolation{1}, τ1) where IT -> SVector{6, Float64}
+
+Evaluate the derivative of the interpolation at the given `τ1` for a uni-variate interpolation.
+
+# Arguments
+- `m::FastChebInterpolation{IT}`: The interpolation object.
+- `τ1`: The variable.
+
+# Returns
+- `SVector{6, Float64}`: The derivative of the interpolation.
+"""
+derivative(m::FastChebInterpolation{1}, τ1) = jacobian(m, τ1)[:]
+
+"""
+    jacobian(m::FastChebInterpolation{2}, τ1, τ2) where IT -> SMatrix{6, 2, Float64, 12}
 
 Evaluate the Jacobian of the interpolation at the given `τ1` and `τ2` for a bi-variate interpolation.
 
@@ -93,6 +109,6 @@ Evaluate the Jacobian of the interpolation at the given `τ1` and `τ2` for a bi
 # Returns
 - `SMatrix{6, 2, Float64, 12}`: The Jacobian of the interpolation.
 """
-function jacobian(m::FastChebInterpolation{IT}, τ1, τ2) where IT
+function jacobian(m::FastChebInterpolation{2}, τ1, τ2)
     return chebjacobian(m.it, SA[τ1, τ2])[2]
 end

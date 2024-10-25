@@ -41,7 +41,7 @@ export Time, ArcLength
 export jacobi_integral
 
 # Interpolation functions
-export value, jacobian
+export value, derivative, jacobian
 
 # Propagation functions
 export propagate_return_all_states, propagate_return_final_state, propagate_return_final_stm
