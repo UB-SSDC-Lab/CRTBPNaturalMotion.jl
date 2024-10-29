@@ -33,13 +33,19 @@
     τ = 0.3256
     println(value(orbit_interp, τ))
     println(value(orbit_lsqf, τ))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">[0.9789529611355379, 0.6318404060243168, 0.08875966767788368, 0.34541976821013654, -0.23137710541353063, -0.14861771991889144]
-[0.9789529611388589, 0.6318404063688291, 0.08875966770290752, 0.34541976870329055, -0.23137710564875202, -0.14861772012947733]</code></pre><p>Clearly, we get similar values from either polynomial representation. Note we can also easily compute the derivative of the polynomial approximations with: </p><pre><code class="language-julia hljs">    jacobian(orbit_lsqf, τ)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">6×1 SMatrix{6, 1, Float64, 6} with indices SOneTo(6)×SOneTo(1):
+[0.9789529611388589, 0.6318404063688291, 0.08875966770290752, 0.34541976870329055, -0.23137710564875202, -0.14861772012947733]</code></pre><p>Clearly, we get similar values from either polynomial representation. Note we can also easily compute the derivative of the polynomial approximations with: </p><pre><code class="language-julia hljs">    derivative(orbit_lsqf, τ)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">6-element SVector{6, Float64} with indices SOneTo(6):
   1.7232881532653046
  -1.1543329178283535
  -0.741449037937681
  -0.4051615491491716
  -2.3431605738983388
- -0.28781354927131886</code></pre><p>Let&#39;s now see the approximation error using both methods.</p><pre><code class="language-julia hljs">    using CairoMakie
+ -0.28781354927131886</code></pre><p>and second derivative with:</p><pre><code class="language-julia hljs">    second_derivative(orbit_lsqf, τ)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">6-element SVector{6, Float64} with indices SOneTo(6):
+  -5.955021173381147
+  -9.05498726608972
+   0.2565855783603923
+ -13.554823226712589
+  10.242679200360815
+   3.4639941246634116</code></pre><p>Let&#39;s now see the approximation error using both methods.</p><pre><code class="language-julia hljs">    using CairoMakie
 
     N = 10000
     τs = range(0.0, 1.0; length = N)
@@ -250,4 +256,4 @@
     surface!(
         ax1, τ1_check_steps, τ2_check_steps, interp_errors[1,:,:]*(halo.DU*1000.0);
         colormap = :viridis,
-    )</code></pre><img src="47a745de.png" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../jpl_api_example/">« Querying the JPL API</a><a class="docs-footer-nextpage" href="../lib/public/">Public API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Friday 25 October 2024 14:56">Friday 25 October 2024</span>. Using Julia version 1.11.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    )</code></pre><img src="47a745de.png" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../jpl_api_example/">« Querying the JPL API</a><a class="docs-footer-nextpage" href="../lib/public/">Public API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Tuesday 29 October 2024 14:37">Tuesday 29 October 2024</span>. Using Julia version 1.11.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
