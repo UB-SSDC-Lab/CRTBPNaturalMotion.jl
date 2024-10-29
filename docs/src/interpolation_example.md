@@ -45,7 +45,11 @@ Next, we'll create two different `FastChebInterpolation`s, one representing an i
 
 Clearly, we get similar values from either polynomial representation. Note we can also easily compute the derivative of the polynomial approximations with: 
 ```@example interpolation
-    jacobian(orbit_lsqf, τ) 
+    derivative(orbit_lsqf, τ) 
+```
+and second derivative with:
+```@example interpolation
+    second_derivative(orbit_lsqf, τ)
 ```
 
 Let's now see the approximation error using both methods.

@@ -11,6 +11,10 @@ using LinearAlgebra
 using LinearSolve
 using NonlinearSolve
 
+# For AD
+import DifferentiationInterface as AD
+import Enzyme
+
 # For JPL API
 import HTTP
 import JSON3
@@ -41,7 +45,7 @@ export Time, ArcLength
 export jacobi_integral
 
 # Interpolation functions
-export value, derivative, jacobian
+export value, derivative, second_derivative, jacobian, hessian
 
 # Propagation functions
 export propagate_return_all_states, propagate_return_final_state, propagate_return_final_stm
