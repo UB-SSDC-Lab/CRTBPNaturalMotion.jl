@@ -8,4 +8,4 @@
 
 A Julia package for working with the Circular Restricted Three-Body Problem (CRTPB) with no control (i.e., natural motion). The package provides a convenient API for propagating the dynamics, computing and approximating (with Chebyshev polynomials) periodic orbits and their associated stable/unstable manifolds, as well as querying JPL's catalog of periodic orbits.
 
-Please see the documentation (click the docs - stable icon) for details on how to use this package.
+Please see the documentation (click the "docs | stable" icon above) for details on how to use this package.
