@@ -27,12 +27,13 @@ the solar system* [doi: 10.1007/s10569-018-9844-6](https://doi.org/10.1007/s1056
 - `SVector{4,T}`: Vector of residuals for the nonlinear system of equations.
 """
 function typeA_shooting_function(
-    u::SVector{4,T}, p;
-    constraint  = (:x_start_coordinate, 0.0),
-    solver      = Vern9(),
-    reltol      = 1e-14,
-    abstol      = 1e-14,
-) where T
+    u::SVector{4,T},
+    p;
+    constraint=(:x_start_coordinate, 0.0),
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
+) where {T}
     # Grab the parameter
     mu = p[1]
 
@@ -44,10 +45,7 @@ function typeA_shooting_function(
 
     # Propagate dynamics for half-period
     xf = propagate_return_final_state(
-        x0, (0.0, half_period), mu;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        x0, (0.0, half_period), mu; solver=solver, reltol=reltol, abstol=abstol
     )
 
     # Compute the extra constraint
@@ -64,21 +62,23 @@ function typeA_shooting_function(
     return SA[xf[2], xf[4], xf[6], F4]
 end
 function typeA_shooting_function!(
-    du::AbstractVector{T}, u::AbstractVector{T}, p;
-    constraint  = (:x_start_coordinate, 0.0),
-    solver      = Vern9(),
-    reltol      = 1e-14,
-    abstol      = 1e-14,
-) where T
-    du .= typeA_shooting_function(
-        SA[u[1], u[2], u[3], u[4]], p;
-        constraint = constraint,
-        solver     = solver,
-        reltol     = reltol,
-        abstol     = abstol,
+    du::AbstractVector{T},
+    u::AbstractVector{T},
+    p;
+    constraint=(:x_start_coordinate, 0.0),
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
+) where {T}
+    return du .= typeA_shooting_function(
+        SA[u[1], u[2], u[3], u[4]],
+        p;
+        constraint=constraint,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
-
 
 """
     typeA_shooting_jacobian(u, p; constraint = (:x_start_coordinate, 0.0))
@@ -104,12 +104,13 @@ axisymmetric periodic orbits for the solar system* [doi: 10.1007/s10569-018-9844
 - `SMatrix{4,4,T,16}`: Jacobian of the nonlinear system of equations.
 """
 function typeA_shooting_jacobian(
-    u::SVector{4,T}, p;
-    constraint  = (:x_start_coordinate, 0.0),
-    solver      = Vern9(),
-    reltol      = 1e-14,
-    abstol      = 1e-14,
-) where T
+    u::SVector{4,T},
+    p;
+    constraint=(:x_start_coordinate, 0.0),
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
+) where {T}
     # Grab the parameter
     mu = p[1]
 
@@ -121,10 +122,7 @@ function typeA_shooting_jacobian(
 
     # Propagate dynamics for half-period to get STM
     xf, STM = propagate_return_final_state_and_stm(
-        x0, (0.0, half_period), mu;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        x0, (0.0, half_period), mu; solver=solver, reltol=reltol, abstol=abstol
     )
 
     # Get the dynamics at the final state
@@ -135,31 +133,34 @@ function typeA_shooting_jacobian(
         J4 = SA[1.0, 0.0, 0.0]
     elseif constraint[1] == :jacobi_integral
         dC_dx0 = jacobi_integral_gradient(x0, mu)
-        J4 = dC_dx0[SA[1,3,5]]
+        J4 = dC_dx0[SA[1, 3, 5]]
     else
         error("Constraint type $(string(constraint[1])) not recognized.")
     end
 
     # Compute and return Jacobian
     return SA[
-        STM[2,1] STM[2,3] STM[2,5] dxf[2];
-        STM[4,1] STM[4,3] STM[4,5] dxf[4];
-        STM[6,1] STM[6,3] STM[6,5] dxf[6];
-           J4[1]    J4[2]    J4[3]    0.0;
+        STM[2, 1] STM[2, 3] STM[2, 5] dxf[2]
+        STM[4, 1] STM[4, 3] STM[4, 5] dxf[4]
+        STM[6, 1] STM[6, 3] STM[6, 5] dxf[6]
+        J4[1] J4[2] J4[3] 0.0
     ]
 end
 function typeA_shooting_jacobian!(
-    J::AbstractMatrix{T}, u::AbstractVector{T}, p;
-    constraint  = (:x_start_coordinate, 0.0),
-    solver      = Vern9(),
-    reltol      = 1e-14,
-    abstol      = 1e-14,
-) where T
-    J .= typeA_shooting_jacobian(
-        SA[u[1], u[2], u[3], u[4]], p;
-        constraint = constraint,
-        solver     = solver,
-        reltol     = reltol,
-        abstol     = abstol,
+    J::AbstractMatrix{T},
+    u::AbstractVector{T},
+    p;
+    constraint=(:x_start_coordinate, 0.0),
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
+) where {T}
+    return J .= typeA_shooting_jacobian(
+        SA[u[1], u[2], u[3], u[4]],
+        p;
+        constraint=constraint,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end

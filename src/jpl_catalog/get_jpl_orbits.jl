@@ -3,16 +3,16 @@ struct System
     name::String
     mass_ratio::Float64
     radius_secondary::Float64
-    L1::SVector{3, Float64}
-    L2::SVector{3, Float64}
-    L3::SVector{3, Float64}
-    L4::SVector{3, Float64}
-    L5::SVector{3, Float64}
+    L1::SVector{3,Float64}
+    L2::SVector{3,Float64}
+    L3::SVector{3,Float64}
+    L4::SVector{3,Float64}
+    L5::SVector{3,Float64}
     DU::Float64
     TU::Float64
 
     function System(json_sys::JSONSystem)
-        new(
+        return new(
             json_sys.name,
             json_sys.mass_ratio,
             json_sys.radius_secondary,
@@ -28,23 +28,23 @@ struct System
 end
 
 struct Limits
-    jacobi::SVector{2, Float64}
-    period::SVector{2, Float64}
-    stability::SVector{2, Float64}
+    jacobi::SVector{2,Float64}
+    period::SVector{2,Float64}
+    stability::SVector{2,Float64}
 
     function Limits(json_limits::JSONLimits)
-        new(
+        return new(
             SA[json_limits.jacobi[1], json_limits.jacobi[2]],
             SA[json_limits.period[1], json_limits.period[2]],
             SA[json_limits.stability[1], json_limits.stability[2]],
         )
     end
     function Limits(
-        jacobi::SVector{2, Float64},
-        period::SVector{2, Float64},
-        stability::SVector{2, Float64},
+        jacobi::SVector{2,Float64},
+        period::SVector{2,Float64},
+        stability::SVector{2,Float64},
     )
-        new(jacobi, period, stability)
+        return new(jacobi, period, stability)
     end
 end
 
@@ -58,14 +58,11 @@ struct OrbitSet <: AbstractVector{GeneralPeriodicOrbit}
     # Limits data
     limits::Limits
 
-    function OrbitSet(
-        orbits::Vector{GeneralPeriodicOrbit},
-        system::JSONSystem,
-    )
+    function OrbitSet(orbits::Vector{GeneralPeriodicOrbit}, system::JSONSystem)
         # Seems to be some issues with the returned limits, so we'll just compute them instead
         minperiod, maxperiod = Inf, -Inf
         minjacobi, maxjacobi = Inf, -Inf
-        minstab, maxstab     = Inf, -Inf
+        minstab, maxstab = Inf, -Inf
         for orbit in orbits
             if orbit.P < minperiod
                 minperiod = orbit.P
@@ -86,23 +83,19 @@ struct OrbitSet <: AbstractVector{GeneralPeriodicOrbit}
                 maxstab = orbit.stability
             end
         end
-        new(
-            orbits, System(system),
+        return new(
+            orbits,
+            System(system),
             Limits(
-                SA[minjacobi, maxjacobi],
-                SA[minperiod, maxperiod],
-                SA[minstab, maxstab],
+                SA[minjacobi, maxjacobi], SA[minperiod, maxperiod], SA[minstab, maxstab]
             ),
         )
     end
-    function OrbitSet(
-        orbits::Vector{GeneralPeriodicOrbit},
-        system::System,
-    )
+    function OrbitSet(orbits::Vector{GeneralPeriodicOrbit}, system::System)
         # Seems to be some issues with the returned limits, so we'll just compute them instead
         minperiod, maxperiod = Inf, -Inf
         minjacobi, maxjacobi = Inf, -Inf
-        minstab, maxstab     = Inf, -Inf
+        minstab, maxstab = Inf, -Inf
         for orbit in orbits
             if orbit.P < minperiod
                 minperiod = orbit.P
@@ -123,12 +116,11 @@ struct OrbitSet <: AbstractVector{GeneralPeriodicOrbit}
                 maxstab = orbit.stability
             end
         end
-        new(
-            orbits, system,
+        return new(
+            orbits,
+            system,
             Limits(
-                SA[minjacobi, maxjacobi],
-                SA[minperiod, maxperiod],
-                SA[minstab, maxstab],
+                SA[minjacobi, maxjacobi], SA[minperiod, maxperiod], SA[minstab, maxstab]
             ),
         )
     end
@@ -146,7 +138,7 @@ Base.length(os::OrbitSet) = length(os.orbits)
 function minimum_period_orbit(os::OrbitSet)
     min_period = Inf
     idx = 0
-    for (i,orbit) in enumerate(os.orbits)
+    for (i, orbit) in enumerate(os.orbits)
         if orbit.P < min_period
             min_period = orbit.P
             idx = i
@@ -157,7 +149,7 @@ end
 function maximum_period_orbit(os::OrbitSet)
     max_period = -Inf
     idx = 0
-    for (i,orbit) in enumerate(os.orbits)
+    for (i, orbit) in enumerate(os.orbits)
         if orbit.P > max_period
             max_period = orbit.P
             idx = i
@@ -176,9 +168,24 @@ function Base.show(io::IO, ::MIME"text/plain", os::OrbitSet)
         period_max_days = os.limits.period[2] * os.system.TU / 86400.0
         println(io, "OrbitSet with $(length(os)) orbits")
         printfmt(io, "\tSystem:            {1:s}\n", os.system.name)
-        printfmt(io, "\tPeriod range:    {1:8.4f} to {2:.4f} days\n", period_min_days, period_max_days)
-        printfmt(io, "\tJacobi range:    {1:8.4f} to {2:.4f}\n", os.limits.jacobi[1], os.limits.jacobi[2])
-        printfmt(io, "\tStability range: {1:8.4f} to {2:.4f}\n", os.limits.stability[1], os.limits.stability[2])
+        printfmt(
+            io,
+            "\tPeriod range:    {1:8.4f} to {2:.4f} days\n",
+            period_min_days,
+            period_max_days,
+        )
+        printfmt(
+            io,
+            "\tJacobi range:    {1:8.4f} to {2:.4f}\n",
+            os.limits.jacobi[1],
+            os.limits.jacobi[2],
+        )
+        printfmt(
+            io,
+            "\tStability range: {1:8.4f} to {2:.4f}\n",
+            os.limits.stability[1],
+            os.limits.stability[2],
+        )
     end
 end
 
@@ -251,38 +258,38 @@ and [API documentation](https://ssd-api.jpl.nasa.gov/doc/periodic_orbits.html) f
 - `OrbitSet`: A set of periodic orbits that meet the query criteria.
 """
 function get_jpl_orbits(;
-    sys::String                        = "earth-moon",
-    family::String                     = "halo",
-    libr::Int                          = 1,
-    branch::String                     = "N",
-    periodmin::Union{Float64,Nothing}  = nothing,
-    periodmax::Union{Float64,Nothing}  = nothing,
-    periodunits::Union{String,Nothing} = nothing,
-    jacobimin::Union{Float64,Nothing}  = nothing,
-    jacobimax::Union{Float64,Nothing}  = nothing,
-    stabmin::Union{Float64,Nothing}    = nothing,
-    stabmax::Union{Float64,Nothing}    = nothing,
-    ode_solver                         = Vern9(),
-    ode_reltol                         = 1e-14,
-    ode_abstol                         = 1e-14,
+    sys::String="earth-moon",
+    family::String="halo",
+    libr::Int=1,
+    branch::String="N",
+    periodmin::Union{Float64,Nothing}=nothing,
+    periodmax::Union{Float64,Nothing}=nothing,
+    periodunits::Union{String,Nothing}=nothing,
+    jacobimin::Union{Float64,Nothing}=nothing,
+    jacobimax::Union{Float64,Nothing}=nothing,
+    stabmin::Union{Float64,Nothing}=nothing,
+    stabmax::Union{Float64,Nothing}=nothing,
+    ode_solver=Vern9(),
+    ode_reltol=1e-14,
+    ode_abstol=1e-14,
 )
     return get_jpl_orbits(
         construct_query(;
-            sys         = sys,
-            family      = family,
-            libr        = libr,
-            branch      = branch,
-            periodmin   = periodmin,
-            periodmax   = periodmax,
-            periodunits = periodunits,
-            jacobimin   = jacobimin,
-            jacobimax   = jacobimax,
-            stabmin     = stabmin,
-            stabmax     = stabmax,
+            sys=sys,
+            family=family,
+            libr=libr,
+            branch=branch,
+            periodmin=periodmin,
+            periodmax=periodmax,
+            periodunits=periodunits,
+            jacobimin=jacobimin,
+            jacobimax=jacobimax,
+            stabmin=stabmin,
+            stabmax=stabmax,
         );
-        ode_solver  = ode_solver,
-        ode_reltol  = ode_reltol,
-        ode_abstol  = ode_abstol,
+        ode_solver=ode_solver,
+        ode_reltol=ode_reltol,
+        ode_abstol=ode_abstol,
     )
 end
 
@@ -306,10 +313,7 @@ and [API documentation](https://ssd-api.jpl.nasa.gov/doc/periodic_orbits.html) f
 - `OrbitSet`: A set of periodic orbits that meet the query criteria.
 """
 function get_jpl_orbits(
-    query::String;
-    ode_solver = Vern9(),
-    ode_reltol = 1e-14,
-    ode_abstol = 1e-14,
+    query::String; ode_solver=Vern9(), ode_reltol=1e-14, ode_abstol=1e-14
 )
     # Request data with query
     orbit_data = request_data(query)
@@ -321,28 +325,34 @@ function get_jpl_orbits(
 
     # Allocate memory for orbits and compute
     orbits = Vector{GeneralPeriodicOrbit}(undef, orbit_data.count)
-    for i in 1:orbit_data.count
+    for i in 1:(orbit_data.count)
         # Form initial state
         x0 = SA[
-            orbit_data.data[i][1], orbit_data.data[i][2], orbit_data.data[i][3],
-            orbit_data.data[i][4], orbit_data.data[i][5], orbit_data.data[i][6],
+            orbit_data.data[i][1],
+            orbit_data.data[i][2],
+            orbit_data.data[i][3],
+            orbit_data.data[i][4],
+            orbit_data.data[i][5],
+            orbit_data.data[i][6],
         ]
 
         # Get period, jacobi, and stability
-        P           = orbit_data.data[i][8]
-        jacobi      = orbit_data.data[i][7]
-        stability   = orbit_data.data[i][9]
+        P = orbit_data.data[i][8]
+        jacobi = orbit_data.data[i][7]
+        stability = orbit_data.data[i][9]
 
         # Compute orbit
         orbits[i] = GeneralPeriodicOrbit(
-            x0, P, mu;
-            TU         = TU,
-            DU         = DU,
-            jacobi     = jacobi,
-            stability  = stability,
-            ode_solver = ode_solver,
-            ode_reltol = ode_reltol,
-            ode_abstol = ode_abstol,
+            x0,
+            P,
+            mu;
+            TU=TU,
+            DU=DU,
+            jacobi=jacobi,
+            stability=stability,
+            ode_solver=ode_solver,
+            ode_reltol=ode_reltol,
+            ode_abstol=ode_abstol,
         )
     end
     return OrbitSet(orbits, orbit_data.system)

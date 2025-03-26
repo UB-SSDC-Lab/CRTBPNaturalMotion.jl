@@ -1,5 +1,5 @@
-@inline synodic_frame_xz_plane_crossing_condition(u::SVector,t,integ) = u[2]
-@inline synodic_frame_xz_plane_crossing_condition(u::SMatrix,t,integ) = u[2,1]
+@inline synodic_frame_xz_plane_crossing_condition(u::SVector, t, integ) = u[2]
+@inline synodic_frame_xz_plane_crossing_condition(u::SMatrix, t, integ) = u[2, 1]
 
 """
     correct_typeA_initial_conditions(
@@ -38,13 +38,16 @@ Correct the initial conditions of a type-A periodic orbit using a forward shooti
     tailored towards StaticArrays.jl arrays).
 """
 function correct_typeA_initial_conditions(
-    rx_guess, rz_guess, vy_guess, mu;
-    N_cross     = 1,
-    constraint  = (:x_start_coordinate, rx_guess),
-    ode_solver  = Vern9(),
-    ode_reltol  = 1e-14,
-    ode_abstol  = 1e-14,
-    nl_solver   = TrustRegion(autodiff = nothing),
+    rx_guess,
+    rz_guess,
+    vy_guess,
+    mu;
+    N_cross=1,
+    constraint=(:x_start_coordinate, rx_guess),
+    ode_solver=Vern9(),
+    ode_reltol=1e-14,
+    ode_abstol=1e-14,
+    nl_solver=TrustRegion(; autodiff=nothing),
 )
     # Define initial state from guess
     x0_guess = SA[rx_guess, 0.0, rz_guess, 0.0, vy_guess, 0.0]
@@ -54,10 +57,13 @@ function correct_typeA_initial_conditions(
     half_P = 0.0
     for _ in 1:N_cross
         ode_sol = propagate_return_all_states(
-            xi, (0.0, Inf), mu, synodic_frame_xz_plane_crossing_condition;
-            solver = ode_solver,
-            reltol = ode_reltol,
-            abstol = ode_abstol,
+            xi,
+            (0.0, Inf),
+            mu,
+            synodic_frame_xz_plane_crossing_condition;
+            solver=ode_solver,
+            reltol=ode_reltol,
+            abstol=ode_abstol,
         )
         half_P += ode_sol.t[end]
         xi = ode_sol.u[end]
@@ -65,18 +71,18 @@ function correct_typeA_initial_conditions(
 
     # Construct shooting function and jacobian
     fun = let constraint = constraint
-        (du,u,p) -> typeA_shooting_function!(du, u, p, constraint = constraint)
+        (du, u, p) -> typeA_shooting_function!(du, u, p; constraint=constraint)
     end
     jac = let constraint = constraint
-        (J,u,p) -> typeA_shooting_jacobian!(J, u, p, constraint = constraint)
+        (J, u, p) -> typeA_shooting_jacobian!(J, u, p; constraint=constraint)
     end
-    nlfun = NonlinearFunction{true, SciMLBase.FullSpecialize}(fun; jac = jac)
-    nlp = NonlinearProblem{true}(nlfun, [rx_guess,rz_guess,vy_guess,half_P], (mu,))
+    nlfun = NonlinearFunction{true,SciMLBase.FullSpecialize}(fun; jac=jac)
+    nlp = NonlinearProblem{true}(nlfun, [rx_guess, rz_guess, vy_guess, half_P], (mu,))
 
     # Solve and return solution with flag indicating success/failure (true/false)
     nlsol = solve(nlp, nl_solver)
     return (
-        SA[nlsol.u[1], nlsol.u[2], nlsol.u[3], 2.0*nlsol.u[4]],
-        SciMLBase.successful_retcode(nlsol)
+        SA[nlsol.u[1], nlsol.u[2], nlsol.u[3], 2.0 * nlsol.u[4]],
+        SciMLBase.successful_retcode(nlsol),
     )
 end

@@ -11,8 +11,7 @@ abstract type AbstractInterpolationWrapper{N} end
 The backend used for all interpolation AD.
 """
 const INTERP_AD_BACKEND = AD.AutoEnzyme(;
-    function_annotation = Enzyme.Const,
-    mode = Enzyme.EnzymeCore.Forward,
+    function_annotation=Enzyme.Const, mode=Enzyme.EnzymeCore.Forward
 )
 
 """
@@ -25,9 +24,9 @@ for details).
 # Fields
 - `it::IT`: The `FastChebInterp.ChebPoly` struct.
 """
-struct FastChebInterpolation{N, T, Td, P, F <: Function} <: AbstractInterpolationWrapper{N}
+struct FastChebInterpolation{N,T,Td,P,F<:Function} <: AbstractInterpolationWrapper{N}
     # The chebyshev polynomial
-    it::FastChebInterp.ChebPoly{N, T, Td}
+    it::FastChebInterp.ChebPoly{N,T,Td}
 
     # The differentiated function for computing second derivatives
     fun::F
@@ -35,25 +34,25 @@ struct FastChebInterpolation{N, T, Td, P, F <: Function} <: AbstractInterpolatio
     # The AD backend for computing second derivatives
     prep::P
 
-    function FastChebInterpolation(
-        it::FastChebInterp.ChebPoly{1,T,Td};
-    ) where {T, Td}
+    function FastChebInterpolation(it::FastChebInterp.ChebPoly{1,T,Td};) where {T,Td}
 
         # Define the function and AD preparation
-        fun = let it = it; τ -> derivative(it, τ); end
+        fun = let it = it
+            τ -> derivative(it, τ)
+        end
         prep = AD.prepare_derivative(fun, INTERP_AD_BACKEND, zero(Float64))
 
-        new{1, T, Td, typeof(prep), typeof(fun)}(it, fun, prep)
+        return new{1,T,Td,typeof(prep),typeof(fun)}(it, fun, prep)
     end
-    function FastChebInterpolation(
-        it::FastChebInterp.ChebPoly{2,T,Td};
-    ) where {T, Td}
+    function FastChebInterpolation(it::FastChebInterp.ChebPoly{2,T,Td};) where {T,Td}
 
         # Define the function and AD preparation
-        fun = let it = it; τ -> jacobian(it, τ); end
-        prep = AD.prepare_jacobian(fun, INTERP_AD_BACKEND, zero(SVector{2, Float64}))
+        fun = let it = it
+            τ -> jacobian(it, τ)
+        end
+        prep = AD.prepare_jacobian(fun, INTERP_AD_BACKEND, zero(SVector{2,Float64}))
 
-        new{2, T, Td, typeof(prep), typeof(fun)}(it, fun, prep)
+        return new{2,T,Td,typeof(prep),typeof(fun)}(it, fun, prep)
     end
 end
 

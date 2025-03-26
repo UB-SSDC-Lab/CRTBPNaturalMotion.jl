@@ -10,7 +10,7 @@ abstract type AbstractManifold end
 
 A Union type of the acceptable types for a list of parameter values.
 """
-ParameterListType = Union{StepRangeLen, AbstractVector}
+ParameterListType = Union{StepRangeLen,AbstractVector}
 
 """
     InvariantManifold{PO <: AbstractPeriodicOrbit}
@@ -22,14 +22,16 @@ A struct for invariant manifolds of periodic orbits.
 - `Δr::Float64`: The manifold perturbation size (change in position) along stable/unstable
     eigenvector direction.
 """
-struct InvariantManifold{PO <: AbstractPeriodicOrbit} <: AbstractManifold
+struct InvariantManifold{PO<:AbstractPeriodicOrbit} <: AbstractManifold
     # The periodic orbit
     orbit::PO
 
     # The manifold perturbation size (change in position)
     Δr::Float64
 
-    function InvariantManifold(orbit::PO, Δ::AbstractFloat) where {PO <: AbstractPeriodicOrbit}
+    function InvariantManifold(
+        orbit::PO, Δ::AbstractFloat
+    ) where {PO<:AbstractPeriodicOrbit}
         Δ < 0 && throw(ArgumentError("Δ must be non-negative"))
         return new{PO}(orbit, Float64(Δ))
     end
@@ -60,17 +62,17 @@ Returns the initial condition for a stable manifold trajectory as parameterized 
 - `x0m::SVector{6,Float64}`: The initial condition for the stable manifold trajectory.
 """
 function get_stable_manifold_initial_condition(
-    man::InvariantManifold, left_pert::Bool, τ1::AbstractFloat, PT::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Get the initial state and monodromy matrix at τ1 point
     x0, M = get_state_and_monodromy_matrix(
-        man.orbit, τ1, PT;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        man.orbit, τ1, PT; solver=solver, reltol=reltol, abstol=abstol
     )
 
     # Perform eigen decomposition
@@ -90,10 +92,10 @@ function get_stable_manifold_initial_condition(
     end
 
     # Compute the perturbation size that changes the position by Δr
-    pert_sf = man.Δr / norm(stable_vec[SA[1,2,3]])
+    pert_sf = man.Δr / norm(stable_vec[SA[1, 2, 3]])
 
     # Return
-    x0m = x0 + pert_sf*stable_vec
+    x0m = x0 + pert_sf * stable_vec
     return x0m
 end
 
@@ -122,17 +124,17 @@ Returns the initial condition for a unstable manifold trajectory as parameterize
 - `x0m::SVector{6,Float64}`: The initial condition for the stable manifold trajectory.
 """
 function get_unstable_manifold_initial_condition(
-    man::InvariantManifold, left_pert::Bool, τ1::AbstractFloat, PT::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Get the initial state and monodromy matrix at τ1 point
     x0, M = get_state_and_monodromy_matrix(
-        man.orbit, τ1, PT;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        man.orbit, τ1, PT; solver=solver, reltol=reltol, abstol=abstol
     )
 
     # Perform eigen decomposition
@@ -152,10 +154,10 @@ function get_unstable_manifold_initial_condition(
     end
 
     # Compute the perturbation size the position by Δr
-    pert_sf = man.Δr / norm(stable_vec[SA[1,2,3]])
+    pert_sf = man.Δr / norm(stable_vec[SA[1, 2, 3]])
 
     # Return
-    x0m = x0 + pert_sf*stable_vec
+    x0m = x0 + pert_sf * stable_vec
     return x0m
 end
 
@@ -191,13 +193,16 @@ Returns a single stable manifold trajectory corresponding to the parameters τ1 
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Check that τ2 ∈ [0, 1]
     if τ2 < 0.0 || τ2 > 1.0
@@ -206,27 +211,27 @@ function get_stable_manifold_trajectory(
 
     return propagate_return_all_states(
         get_stable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
-        (0.0, -τ2*manifold_length),
+        (0.0, -τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    τ2::ParameterListType,  PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Check that τ2 ∈ [0, 1]
     if minimum(τ2) < 0.0 || maximum(τ2) > 1.0
@@ -235,17 +240,14 @@ function get_stable_manifold_trajectory(
 
     return propagate_return_all_states(
         get_stable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
-        -τ2*manifold_length,
+        -τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -293,133 +295,137 @@ of the returned trajectory from the initial condition on the periodic orbit.
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_distance::AbstractFloat, τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_distance::AbstractFloat,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_stable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, -start_distance),
             man.orbit.mu,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        (0.0, -τ2*manifold_length),
+        (0.0, -τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = 1e-14,
+        solver=solver,
+        reltol=reltol,
+        abstol=1e-14,
     )
 end
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_distance::AbstractFloat, τ2::ParameterListType, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_distance::AbstractFloat,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_stable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, -start_distance),
             man.orbit.mu,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        -τ2*manifold_length,
+        -τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_stable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, -Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        (0.0, -τ2*manifold_length),
+        (0.0, -τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, τ2::ParameterListType, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_stable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, -Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        -τ2*manifold_length,
+        -τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -451,27 +457,27 @@ termination condition callback function.
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat,   PT1::ParameterizationType,
-    term_cond::Function, PT2::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    term_cond::Function,
+    PT2::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         get_stable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
         (0.0, -Inf),
         man.orbit.mu,
         term_cond,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -505,36 +511,37 @@ the final state is determined through the satisfaction of `term_cond`, where `st
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_stable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, term_cond::Function, PT2::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    term_cond::Function,
+    PT2::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_stable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, -Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
         (0.0, -Inf),
         man.orbit.mu,
         term_cond,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -570,13 +577,16 @@ Returns a single unstable manifold trajectory corresponding to the parameters τ
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Check that τ2 ∈ [0, 1]
     if τ2 < 0.0 || τ2 > 1.0
@@ -585,27 +595,27 @@ function get_unstable_manifold_trajectory(
 
     return propagate_return_all_states(
         get_unstable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
-        (0.0, τ2*manifold_length),
+        (0.0, τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat,     PT1::ParameterizationType,
-    τ2::ParameterListType, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Check that τ2 ∈ [0, 1]
     if τ2 < 0.0 || τ2 > 1.0
@@ -614,17 +624,14 @@ function get_unstable_manifold_trajectory(
 
     return propagate_return_all_states(
         get_unstable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
-        τ2*manifold_length,
+        τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -672,134 +679,138 @@ of the returned trajectory from the initial condition on the periodic orbit.
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_distance::AbstractFloat, τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_distance::AbstractFloat,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Propagate and return
     return propagate_return_all_states(
         propagate_return_final_state(
             get_unstable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, start_distance),
             man.orbit.mu,
             PT2,
         ),
-        (0.0, τ2*manifold_length),
+        (0.0, τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_distance::AbstractFloat, τ2::ParameterListType, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_distance::AbstractFloat,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Propagate and return
     return propagate_return_all_states(
         propagate_return_final_state(
             get_unstable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, start_distance),
             man.orbit.mu,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        τ2*manifold_length,
+        τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, τ2::AbstractFloat, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Propagate and return
     return propagate_return_all_states(
         propagate_return_final_state(
             get_unstable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        (0.0, τ2*manifold_length),
+        (0.0, τ2 * manifold_length),
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, τ2::ParameterListType, PT2::ParameterizationType;
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    τ2::ParameterListType,
+    PT2::ParameterizationType;
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Propagate and return
     return propagate_return_all_states(
         propagate_return_final_state(
             get_unstable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
-        τ2*manifold_length,
+        τ2 * manifold_length,
         man.orbit.mu,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -831,27 +842,27 @@ termination condition callback function.
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat,   PT1::ParameterizationType,
-    term_cond::Function, PT2::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    term_cond::Function,
+    PT2::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         get_unstable_manifold_initial_condition(
-            man, left_pert, τ1, PT1;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
         ),
         (0.0, Inf),
         man.orbit.mu,
         term_cond,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -885,36 +896,37 @@ the final state is determined through the satisfaction of `term_cond`, where `st
 - `abstol = 1e-14`: The absolute tolerance for the solver.
 """
 function get_unstable_manifold_trajectory(
-    man::InvariantManifold, left_pert::Bool,
-    τ1::AbstractFloat, PT1::ParameterizationType,
-    start_cond::Function, term_cond::Function, PT2::ParameterizationType;
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1::AbstractFloat,
+    PT1::ParameterizationType,
+    start_cond::Function,
+    term_cond::Function,
+    PT2::ParameterizationType;
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     return propagate_return_all_states(
         propagate_return_final_state(
             get_unstable_manifold_initial_condition(
-                man, left_pert, τ1, PT1;
-                solver = solver,
-                reltol = reltol,
-                abstol = abstol,
+                man, left_pert, τ1, PT1; solver=solver, reltol=reltol, abstol=abstol
             ),
             (0.0, Inf),
             man.orbit.mu,
             start_cond,
             PT2;
-            solver = solver,
-            reltol = reltol,
-            abstol = abstol,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         ),
         (0.0, Inf),
         man.orbit.mu,
         term_cond,
         PT2;
-        solver = solver,
-        reltol = reltol,
-        abstol = abstol,
+        solver=solver,
+        reltol=reltol,
+        abstol=abstol,
     )
 end
 
@@ -958,29 +970,37 @@ Generate a Chebyshev interpolant for a cross-section of the stable `InvariantMan
     interpolant for the stable manifold.
 """
 function generate_stable_manifold_cross_section_cheb_interpolant(
-    man::InvariantManifold, left_pert::Bool,
-    τ1_order::Int, PT1::ParameterizationType,
-    τ2::AbstractFloat, PT2::ParameterizationType;
-    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1_order::Int,
+    PT1::ParameterizationType,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat}=nothing,
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Generate range of parameter values
     τ1s = chebpoints(τ1_order, 0.0, 1.0)
 
     # Loop over parameter values
-    states = Vector{SVector{6,Float64}}(undef, τ1_order+1)
+    states = Vector{SVector{6,Float64}}(undef, τ1_order + 1)
     for (i, τ1) in enumerate(τ1s)
         # Get manifold states
         states[i] = get_stable_manifold_trajectory(
-            man, left_pert, τ1, PT1,
-            start_cond, τ2, PT2;
-            manifold_length = manifold_length,
-            solver          = solver,
-            reltol          = reltol,
-            abstol          = abstol,
+            man,
+            left_pert,
+            τ1,
+            PT1,
+            start_cond,
+            τ2,
+            PT2;
+            manifold_length=manifold_length,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         )[end]
     end
 
@@ -1029,14 +1049,18 @@ a least-squares fit to
     interpolant for the stable manifold.
 """
 function generate_stable_manifold_cross_section_cheb_approximation(
-    man::InvariantManifold, left_pert::Bool,
-    τ1_npoints::Int, τ1_order::Int, PT1::ParameterizationType,
-    τ2::AbstractFloat, PT2::ParameterizationType;
-    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1_npoints::Int,
+    τ1_order::Int,
+    PT1::ParameterizationType,
+    τ2::AbstractFloat,
+    PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat}=nothing,
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Generate range of parameter values
     τ1s = chebpoints(τ1_npoints - 1, 0.0, 1.0)
@@ -1046,12 +1070,17 @@ function generate_stable_manifold_cross_section_cheb_approximation(
     for (i, τ1) in enumerate(τ1s)
         # Get manifold states
         states[i] = get_stable_manifold_trajectory(
-            man, left_pert, τ1, PT1,
-            start_cond, τ2, PT2;
-            manifold_length = manifold_length,
-            solver          = solver,
-            reltol          = reltol,
-            abstol          = abstol,
+            man,
+            left_pert,
+            τ1,
+            PT1,
+            start_cond,
+            τ2,
+            PT2;
+            manifold_length=manifold_length,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         )[end]
     end
 
@@ -1097,39 +1126,47 @@ Generate a Chebyshev interpolant for the stable `InvariantManifold`.
     interpolant for the stable manifold.
 """
 function generate_stable_manifold_cheb_interpolant(
-    man::InvariantManifold, left_pert::Bool,
-    τ1_order::Int, PT1::ParameterizationType,
-    τ2_order::Int, PT2::ParameterizationType;
-    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1_order::Int,
+    PT1::ParameterizationType,
+    τ2_order::Int,
+    PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat}=nothing,
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Generate range of parameter values
-    lb = SA[0,0]
-    ub = SA[1,1]
+    lb = SA[0, 0]
+    ub = SA[1, 1]
     τs = chebpoints(SA[τ1_order, τ2_order], lb, ub)
 
     # These are avoidable allocations, but we only call this once
     # before using the interp a bunch
-    τ1s = [τs[i,1][1] for i in axes(τs, 1)]
-    τ2s = [τs[1,end - i + 1][2] for i in axes(τs, 2)]
+    τ1s = [τs[i, 1][1] for i in axes(τs, 1)]
+    τ2s = [τs[1, end - i + 1][2] for i in axes(τs, 2)]
 
     # Loop over parameter values
-    states = Matrix{SVector{6,Float64}}(undef, τ1_order+1, τ2_order+1)
+    states = Matrix{SVector{6,Float64}}(undef, τ1_order + 1, τ2_order + 1)
     for (i, τ1) in enumerate(τ1s)
         # Get manifold states
         τ1_traj = get_stable_manifold_trajectory(
-            man, left_pert, τ1, PT1,
-            start_cond, τ2s, PT2;
-            manifold_length = manifold_length,
-            solver          = solver,
-            reltol          = reltol,
-            abstol          = abstol,
+            man,
+            left_pert,
+            τ1,
+            PT1,
+            start_cond,
+            τ2s,
+            PT2;
+            manifold_length=manifold_length,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         )
         for j in eachindex(τ2s)
-            states[i,j] = τ1_traj[end - j + 1]
+            states[i, j] = τ1_traj[end - j + 1]
         end
     end
 
@@ -1179,38 +1216,48 @@ Chebyshev polynomial of order `τ1_order` and `τ2_order`, respectively.
     interpolant for the stable manifold.
 """
 function generate_stable_manifold_cheb_approximation(
-    man::InvariantManifold, left_pert::Bool,
-    τ1_npoints::Int, τ1_order::Int, PT1::ParameterizationType,
-    τ2_npoints::Int, τ2_order::Int, PT2::ParameterizationType;
-    start_cond::Union{Nothing,Function,AbstractFloat} = nothing,
-    manifold_length::AbstractFloat = 1.0,
-    solver = Vern9(),
-    reltol = 1e-14,
-    abstol = 1e-14,
+    man::InvariantManifold,
+    left_pert::Bool,
+    τ1_npoints::Int,
+    τ1_order::Int,
+    PT1::ParameterizationType,
+    τ2_npoints::Int,
+    τ2_order::Int,
+    PT2::ParameterizationType;
+    start_cond::Union{Nothing,Function,AbstractFloat}=nothing,
+    manifold_length::AbstractFloat=1.0,
+    solver=Vern9(),
+    reltol=1e-14,
+    abstol=1e-14,
 )
     # Generate range of parameter values
-    lb = SA[0,0]
-    ub = SA[1,1]
+    lb = SA[0, 0]
+    ub = SA[1, 1]
     τs = chebpoints(SA[τ1_npoints - 1, τ2_npoints - 1], lb, ub)
 
     # These are avoidable allocations, but we only call this once
     # before using the interp a bunch
-    τ1s = [τs[i,1][1] for i in axes(τs, 1)]
-    τ2s = [τs[1,end - i + 1][2] for i in axes(τs, 2)]
+    τ1s = [τs[i, 1][1] for i in axes(τs, 1)]
+    τ2s = [τs[1, end - i + 1][2] for i in axes(τs, 2)]
 
     # Loop over parameter values
-    idx     = 0
-    xs      = Vector{SVector{2,Float64}}(undef, τ1_npoints*τ2_npoints)
-    states  = Vector{SVector{6,Float64}}(undef, τ1_npoints*τ2_npoints)
+    idx = 0
+    xs = Vector{SVector{2,Float64}}(undef, τ1_npoints * τ2_npoints)
+    states = Vector{SVector{6,Float64}}(undef, τ1_npoints * τ2_npoints)
     for (i, τ1) in enumerate(τ1s)
         # Get manifold states
         τ1_traj = get_stable_manifold_trajectory(
-            man, left_pert, τ1, PT1,
-            start_cond, τ2s, PT2;
-            manifold_length = manifold_length,
-            solver          = solver,
-            reltol          = reltol,
-            abstol          = abstol,
+            man,
+            left_pert,
+            τ1,
+            PT1,
+            start_cond,
+            τ2s,
+            PT2;
+            manifold_length=manifold_length,
+            solver=solver,
+            reltol=reltol,
+            abstol=abstol,
         )
         for j in eachindex(τ2s)
             idx += 1
