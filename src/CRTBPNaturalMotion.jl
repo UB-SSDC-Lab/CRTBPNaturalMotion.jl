@@ -13,12 +13,12 @@ using NonlinearSolve
 
 # For AD
 import DifferentiationInterface as AD
-import Enzyme
+using Enzyme: Enzyme
 
 # For JPL API
-import HTTP
-import JSON3
-import StructTypes
+using HTTP: HTTP
+using JSON3: JSON3
+using StructTypes: StructTypes
 
 include("type_flags.jl")
 include("utils.jl")

@@ -16,26 +16,21 @@ makedocs(;
         "Home" => "index.md",
         "Examples" => [
             "Computing Halo Orbits" => "periodic_orbit_example.md",
-            "Querying the JPL API"  => "jpl_api_example.md",
-            "Interpolation"         => "interpolation_example.md",
+            "Querying the JPL API" => "jpl_api_example.md",
+            "Interpolation" => "interpolation_example.md",
         ],
         "Reference" => [
-            "Public API"                    => "lib/public.md",
-            "Querying JPL Catelog"          => "lib/public/jpl_orbits.md",
-            "Periodic Orbit Computation"    => "lib/public/orbit_computation.md",
-            "Stable/Unstable Manifolds"     => "lib/public/manifolds.md",
-            "Propagation"                   => "lib/public/propagation.md",
-            "Type Flags"                    => "lib/public/type_flags.md",
-            "Utilities"                     => "lib/public/utilities.md",
+            "Public API" => "lib/public.md",
+            "Querying JPL Catelog" => "lib/public/jpl_orbits.md",
+            "Periodic Orbit Computation" => "lib/public/orbit_computation.md",
+            "Stable/Unstable Manifolds" => "lib/public/manifolds.md",
+            "Propagation" => "lib/public/propagation.md",
+            "Type Flags" => "lib/public/type_flags.md",
+            "Utilities" => "lib/public/utilities.md",
         ],
-        "Developer" => [
-            "Internals" => "lib/internal/temp.md",
-        ]
+        "Developer" => ["Internals" => "lib/internal/temp.md"],
     ],
-    pagesonly = true,
+    pagesonly=true,
 )
 
-deploydocs(;
-    repo="github.com/UB-SSDC-Lab/CRTBPNaturalMotion.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/UB-SSDC-Lab/CRTBPNaturalMotion.jl", devbranch="main")
