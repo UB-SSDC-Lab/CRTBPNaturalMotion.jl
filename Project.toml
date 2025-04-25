@@ -1,7 +1,7 @@
 name = "CRTBPNaturalMotion"
 uuid = "4cf003db-9ce5-4b9c-be33-539375ceab17"
 authors = ["Grant Hecht"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
