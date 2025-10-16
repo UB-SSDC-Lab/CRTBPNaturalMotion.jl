@@ -221,8 +221,9 @@ Get the full initial reference state of the periodic `orbit`.
 # Returns
 - `x0::SVector{6,Float64}`: The full initial state of the periodic orbit.
 """
-get_full_initial_state(orbit::TypeAPeriodicOrbit) =
+function get_full_initial_state(orbit::TypeAPeriodicOrbit)
     SA[orbit.u0[1], 0.0, orbit.u0[2], 0.0, orbit.u0[3], 0.0]
+end
 get_full_initial_state(orbit::GeneralPeriodicOrbit) = orbit.x0
 
 """
@@ -251,8 +252,9 @@ Get the Jacobi integral of the periodic `orbit`.
 # Returns
 - `C::Float64`: The Jacobi integral of the periodic orbit.
 """
-get_jacobi_integral(orbit::AbstractPeriodicOrbit) =
+function get_jacobi_integral(orbit::AbstractPeriodicOrbit)
     jacobi_integral(get_full_initial_state(orbit), orbit.mu)
+end
 
 """
     propagate_from_initial_conditions(

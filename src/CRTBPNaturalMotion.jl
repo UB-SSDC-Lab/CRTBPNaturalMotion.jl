@@ -36,6 +36,7 @@ include(joinpath("jpl_catalog", "query_construction.jl"))
 include(joinpath("jpl_catalog", "query_structs.jl"))
 include(joinpath("jpl_catalog", "query_request.jl"))
 include(joinpath("jpl_catalog", "get_jpl_orbits.jl"))
+include(joinpath("jpl_catalog", "filter_orbit_set.jl"))
 
 # Provides easy definition of sample orbits (not exported)
 include("scenario_orbits.jl")
@@ -68,7 +69,7 @@ export generate_stable_manifold_cheb_approximation
 export save_interp, load_interp
 
 # JPL API
-export get_jpl_orbits
+export get_jpl_orbits, filter_orbit_set
 export minimum_period_orbit, maximum_period_orbit
 
 end
