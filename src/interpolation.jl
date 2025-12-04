@@ -9,10 +9,14 @@ abstract type AbstractInterpolationWrapper{N} end
     INTERP_AD_BACKEND
 
 The backend used for all interpolation AD.
+
+Swapped from Enzyme to ForwardDiff as Enzyme forward mode seems to be broken with the
+latest versions of Enzyme.jl and DifferentiationInterface.jl (at least on Julia v1.12.1)
 """
-const INTERP_AD_BACKEND = AD.AutoEnzyme(;
-    function_annotation=Enzyme.Const, mode=Enzyme.EnzymeCore.Forward
-)
+# const INTERP_AD_BACKEND = AD.AutoEnzyme(;
+#     function_annotation=Enzyme.Const, mode=Enzyme.EnzymeCore.Forward
+# )
+const INTERP_AD_BACKEND = AD.AutoForwardDiff(; chunksize=1)
 
 """
     FastChebInterpolation(it::IT) <: AbstractInterpolationWrapper
