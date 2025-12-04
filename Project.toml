@@ -1,6 +1,6 @@
 name = "CRTBPNaturalMotion"
 uuid = "4cf003db-9ce5-4b9c-be33-539375ceab17"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Grant Hecht"]
 
 [deps]
